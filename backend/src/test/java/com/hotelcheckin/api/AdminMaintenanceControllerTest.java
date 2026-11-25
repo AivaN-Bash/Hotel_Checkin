@@ -9,10 +9,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.hotelcheckin.service.AdminKeyVerifier;
 import com.hotelcheckin.service.MaintenanceState;
 import com.hotelcheckin.service.ServiceStatusService;
+import com.hotelcheckin.service.ApiException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,6 +22,10 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(StatusController.class)
 @TestPropertySource(properties = "app.admin.api-key=expected-secret-value-1234567890")
 class AdminMaintenanceControllerTest {
+  private static final String ADMIN_KEY_HEADER = "X-Admin-Key";
+  private static final String WRONG_ADMIN_KEY = "wrong-secret-value";
+  private static final String MAINTENANCE_REQUEST = "{\"enabled\":true}";
+
   @Autowired private MockMvc mockMvc;
   @MockBean private ServiceStatusService statusService;
   @MockBean private MaintenanceState maintenanceState;
@@ -28,20 +34,22 @@ class AdminMaintenanceControllerTest {
   @Test
   void rejectsWrongAdminKey() throws Exception {
     doThrow(
-            new com.hotelcheckin.service.ApiException(
-                org.springframework.http.HttpStatus.UNAUTHORIZED,
+            new ApiException(
+                HttpStatus.UNAUTHORIZED,
                 "UNAUTHORIZED",
                 "A valid admin key is required."))
         .when(adminKeyVerifier)
-        .requireValid("wrong-secret-value");
+        .requireValid(WRONG_ADMIN_KEY);
+
     mockMvc
         .perform(
             post("/api/v1/admin/maintenance")
-                .header("X-Admin-Key", "wrong-secret-value")
+                .header(ADMIN_KEY_HEADER, WRONG_ADMIN_KEY)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"enabled\":true}"))
+                .content(MAINTENANCE_REQUEST))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
-    verify(adminKeyVerifier).requireValid("wrong-secret-value");
+
+    verify(adminKeyVerifier).requireValid(WRONG_ADMIN_KEY);
   }
 }
