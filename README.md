@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/AivaN-Bash/Hotel_Checkin/actions/workflows/ci.yml/badge.svg)](https://github.com/AivaN-Bash/Hotel_Checkin/actions/workflows/ci.yml)
 
-A portfolio demo for a bilingual, touch-friendly hotel self check-in kiosk. Guests can find a seeded reservation, review their stay, step through simulated identity and deposit checks, and receive an assigned room with a demo QR key. React/Vite serves the kiosk, Spring Boot validates and coordinates check-ins, and PostgreSQL stores bookings, rooms, and check-in records. **Live demo:** [not deployed yet](#free-deployment-guide).
+A portfolio demo for a bilingual, touch-friendly hotel self check-in kiosk. Guests can find a seeded reservation, review their stay, step through simulated identity and deposit checks, and receive an assigned room with a demo QR key. React/Vite serves the kiosk, Spring Boot validates and coordinates check-ins, and PostgreSQL stores bookings, rooms, and check-in records. **Live demo:** [Open the kiosk](https://frontend-nine-kohl-nzqk24mi4s.vercel.app).
 
 > This is a demonstration, not hotel operating software. Identity verification, payment, and the QR key are simulations. Use only the included fake records.
 
