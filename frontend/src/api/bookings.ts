@@ -19,7 +19,9 @@ export async function lookupBooking(
           phoneNumber: state.phoneNumber.trim(),
         };
   return requestJson<BookingDetails>(
-    "/v1/bookings/lookup",
+    state.mode === "checkout"
+      ? "/v1/bookings/checkout-lookup"
+      : "/v1/bookings/lookup",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -27,6 +29,14 @@ export async function lookupBooking(
     },
     BOOKING_LOOKUP_TIMEOUT_MS,
   );
+}
+
+export async function completeCheckout(bookingId: string): Promise<void> {
+  await requestJson<void>("/v1/checkouts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ bookingId }),
+  });
 }
 
 export async function completeCheckin(

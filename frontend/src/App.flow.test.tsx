@@ -85,4 +85,55 @@ describe("self check-in journey", () => {
       ).toBeInTheDocument(),
     );
   });
+
+  it("checks out an active stay and confirms completion", async () => {
+    const booking = {
+      id: "10000000-0000-0000-0000-000000000003",
+      guestName: "Taylor Chen",
+      roomType: "Deluxe King",
+      checkInDate: "2026-11-25",
+      checkOutDate: "2026-11-26",
+      guestCount: 2,
+    };
+    const status = new Response(
+      JSON.stringify({
+        status: "OPERATIONAL",
+        components: { api: "UP", database: "UP" },
+        message: "Ready",
+        estimatedBackAt: null,
+        checkedAt: "2026-11-25T00:00:00Z",
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(status)
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify(booking), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(
+      await screen.findByRole("button", { name: "Begin check-out" }),
+    );
+    await user.type(screen.getByLabelText("Booking code"), "DEMO2028");
+    await user.click(screen.getByRole("button", { name: "Find my booking" }));
+    expect(
+      await screen.findByRole("heading", { name: "Ready to check out?" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Confirm check-out" }));
+    expect(
+      await screen.findByRole("heading", { name: "You’re checked out" }),
+    ).toBeInTheDocument();
+    expect(String(fetchMock.mock.calls[1][0])).toContain(
+      "/v1/bookings/checkout-lookup",
+    );
+    expect(String(fetchMock.mock.calls[2][0])).toContain("/v1/checkouts");
+  });
 });

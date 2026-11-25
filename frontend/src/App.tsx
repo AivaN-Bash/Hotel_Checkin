@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef } from "react";
 import { ApiError, ApiTimeoutError } from "./api/client";
-import { completeCheckin, lookupBooking } from "./api/bookings";
+import {
+  completeCheckin,
+  completeCheckout,
+  lookupBooking,
+} from "./api/bookings";
 import { IdleWarning } from "./components/IdleWarning";
 import {
   MaintenanceScreen,
@@ -134,6 +138,20 @@ function KioskApp() {
     }
   };
 
+  const finishCheckout = async () => {
+    if (!flow.booking || requestInProgress.current) return;
+    requestInProgress.current = true;
+    dispatch({ type: "CHECKIN_STARTED" });
+    try {
+      await completeCheckout(flow.booking.id);
+      dispatch({ type: "CHECKOUT_SUCCEEDED" });
+    } catch (error) {
+      dispatch({ type: "REQUEST_FAILED", ...readError(error, flow.language) });
+    } finally {
+      requestInProgress.current = false;
+    }
+  };
+
   if (service.view === "warming")
     return (
       <WakingScreen
@@ -166,6 +184,9 @@ function KioskApp() {
           }
           onThemeToggle={toggleTheme}
           onStart={() => dispatch({ type: "NEXT" })}
+          onStartCheckout={() =>
+            dispatch({ type: "SET_MODE", mode: "checkout" })
+          }
         />
       );
       break;
@@ -204,11 +225,18 @@ function KioskApp() {
           language={flow.language}
           theme={flow.theme}
           booking={flow.booking}
+          checkout={flow.mode === "checkout"}
+          error={flow.error}
+          busy={flow.busy}
           onLanguageChange={changeLanguage}
           onThemeToggle={toggleTheme}
           onBack={goBack}
           onCancel={startOver}
-          onContinue={() => dispatch({ type: "NEXT" })}
+          onContinue={() =>
+            flow.mode === "checkout"
+              ? void finishCheckout()
+              : dispatch({ type: "NEXT" })
+          }
         />
       );
       break;
@@ -254,7 +282,13 @@ function KioskApp() {
       );
       break;
     case "success":
-      screen = <SuccessScreen language={flow.language} onFinish={startOver} />;
+      screen = (
+        <SuccessScreen
+          language={flow.language}
+          checkedOut={flow.mode === "checkout"}
+          onFinish={startOver}
+        />
+      );
       break;
   }
 
@@ -282,6 +316,8 @@ function readError(
       return { code: error.body.code, message: t.errorNotFound };
     if (error.body.code === "ALREADY_CHECKED_IN")
       return { code: error.body.code, message: t.errorAlready };
+    if (error.body.code === "NOT_CHECKED_IN")
+      return { code: error.body.code, message: t.notCheckedIn };
     if (error.body.code === "VALIDATION_ERROR")
       return { code: error.body.code, message: t.errorValidation };
     if (

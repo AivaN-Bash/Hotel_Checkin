@@ -76,6 +76,32 @@ public class CheckinService {
   }
 
   @Transactional
+  public void checkOut(CheckinRequest request) {
+    var booking =
+        bookings
+            .findLockedById(request.bookingId())
+            .orElseThrow(
+                () ->
+                    new ApiException(
+                        HttpStatus.NOT_FOUND, "BOOKING_NOT_FOUND", "Booking not found."));
+    if (!"CHECKED_IN".equals(booking.getStatus()))
+      throw new ApiException(
+          HttpStatus.CONFLICT, "NOT_CHECKED_IN", "This booking is not currently checked in.");
+    var checkin =
+        checkins
+            .findWithRoomByBookingId(booking.getId())
+            .orElseThrow(
+                () ->
+                    new ApiException(
+                        HttpStatus.CONFLICT,
+                        "CHECKIN_RECORD_MISSING",
+                        "No active room assignment was found."));
+    checkin.getRoom().markAvailable();
+    checkin.markCheckedOut();
+    booking.markCheckedOut();
+  }
+
+  @Transactional
   public CheckinResponse get(UUID id) {
     return checkins
         .findById(id)

@@ -805,6 +805,9 @@ input {
   min-height: 66px;
   padding-inline: 26px;
 }
+.welcome-checkout {
+  margin-top: 12px;
+}
 .welcome-assurance {
   display: flex;
   align-items: center;

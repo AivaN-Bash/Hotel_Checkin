@@ -9,6 +9,13 @@ export const copy = {
     welcomeBody:
       "A thoughtful welcome is just a few steps away. Check in at your own pace.",
     start: "Begin check-in",
+    startCheckout: "Begin check-out",
+    checkoutTitle: "Ready to check out?",
+    checkoutBody: "Review your stay, then confirm your check-out.",
+    checkoutConfirm: "Confirm check-out",
+    checkoutSuccessTitle: "You’re checked out",
+    checkoutSuccessBody: "Thank you for staying with The Aster.",
+    notCheckedIn: "This booking is not currently checked in.",
     secure: "Private, secure & ready when you are",
     steps: [
       "Find booking",
@@ -89,6 +96,13 @@ export const copy = {
     welcomeTitle: "เริ่มต้นการเข้าพัก\nอย่างงดงาม",
     welcomeBody: "ต้อนรับคุณอย่างใส่ใจ เช็กอินได้ตามจังหวะที่คุณสะดวก",
     start: "เริ่มเช็กอิน",
+    startCheckout: "เริ่มเช็กเอาต์",
+    checkoutTitle: "พร้อมเช็กเอาต์หรือยัง?",
+    checkoutBody: "ตรวจสอบข้อมูลการเข้าพัก แล้วกดยืนยันการเช็กเอาต์",
+    checkoutConfirm: "ยืนยันการเช็กเอาต์",
+    checkoutSuccessTitle: "เช็กเอาต์เรียบร้อยแล้ว",
+    checkoutSuccessBody: "ขอบคุณที่เข้าพักกับเดอะ แอสเตอร์",
+    notCheckedIn: "การจองนี้ยังไม่ได้เช็กอิน",
     secure: "เป็นส่วนตัว ปลอดภัย และพร้อมเมื่อคุณต้องการ",
     steps: [
       "ค้นหาการจอง",

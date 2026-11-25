@@ -8,6 +8,7 @@ function newIdempotencyKey(): string {
 export function initialKioskState(): KioskState {
   return {
     step: "welcome",
+    mode: "checkin",
     language: "en",
     theme: "light",
     lookupMethod: "code",
@@ -29,6 +30,8 @@ export function kioskReducer(
   switch (action.type) {
     case "SET_LANGUAGE":
       return { ...state, language: action.language };
+    case "SET_MODE":
+      return { ...state, mode: action.mode, step: "lookup", error: null };
     case "TOGGLE_THEME":
       return { ...state, theme: state.theme === "light" ? "dark" : "light" };
     case "SET_LOOKUP_METHOD":
@@ -59,6 +62,8 @@ export function kioskReducer(
         error: null,
         step: "assigned",
       };
+    case "CHECKOUT_SUCCEEDED":
+      return { ...state, busy: false, error: null, step: "success" };
     case "REQUEST_FAILED":
       return {
         ...state,

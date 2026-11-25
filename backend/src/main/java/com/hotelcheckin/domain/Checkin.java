@@ -13,8 +13,8 @@ public class Checkin {
   @JoinColumn(name = "booking_id", nullable = false, unique = true)
   private Booking booking;
 
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "room_id", nullable = false, unique = true)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "room_id", nullable = false)
   private Room room;
 
   @Column(name = "idempotency_key", nullable = false, unique = true, length = 80)
@@ -22,6 +22,9 @@ public class Checkin {
 
   @Column(name = "created_at", nullable = false)
   private OffsetDateTime createdAt;
+
+  @Column(name = "checked_out_at")
+  private OffsetDateTime checkedOutAt;
 
   protected Checkin() {}
 
@@ -51,5 +54,13 @@ public class Checkin {
 
   public OffsetDateTime getCreatedAt() {
     return createdAt;
+  }
+
+  public void markCheckedOut() {
+    checkedOutAt = OffsetDateTime.now(java.time.ZoneOffset.UTC);
+  }
+
+  public OffsetDateTime getCheckedOutAt() {
+    return checkedOutAt;
   }
 }

@@ -77,4 +77,8 @@ public class Booking {
   public void markCheckedIn() {
     status = "CHECKED_IN";
   }
+
+  public void markCheckedOut() {
+    status = "CHECKED_OUT";
+  }
 }

@@ -45,4 +45,8 @@ public class Room {
   public void markAssigned() {
     status = "OCCUPIED";
   }
+
+  public void markAvailable() {
+    status = "AVAILABLE";
+  }
 }

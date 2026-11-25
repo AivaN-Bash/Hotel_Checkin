@@ -144,12 +144,18 @@ export function BookingLookupScreen(props: LookupProps) {
 interface ConfirmProps extends SharedProps {
   booking: BookingDetails;
   onContinue: () => void;
+  checkout?: boolean;
+  error?: { code: string; message: string } | null;
+  busy?: boolean;
 }
 
 export function ConfirmBookingScreen({
   booking,
   language,
   onContinue,
+  checkout = false,
+  error = null,
+  busy = false,
   ...sharedProps
 }: ConfirmProps) {
   const t = copy[language];
@@ -157,10 +163,11 @@ export function ConfirmBookingScreen({
     <StepLayout
       {...shared({ ...sharedProps, language })}
       step="confirm"
-      title={t.confirmTitle}
-      subtitle={t.confirmBody}
-      primaryLabel={t.reviewContinue}
+      title={checkout ? t.checkoutTitle : t.confirmTitle}
+      subtitle={checkout ? t.checkoutBody : t.confirmBody}
+      primaryLabel={checkout ? t.checkoutConfirm : t.reviewContinue}
       onPrimary={onContinue}
+      isPending={busy}
       onBack={sharedProps.onBack}
       onCancel={sharedProps.onCancel}
     >
@@ -177,6 +184,7 @@ export function ConfirmBookingScreen({
         />
         <DetailRow label={t.guests} value={String(booking.guestCount)} />
       </dl>
+      {error && <ErrorMessage message={error.message} />}
     </StepLayout>
   );
 }
@@ -297,9 +305,14 @@ export function AssignedRoomScreen({
 interface SuccessProps {
   language: Language;
   onFinish: () => void;
+  checkedOut?: boolean;
 }
 
-export function SuccessScreen({ language, onFinish }: SuccessProps) {
+export function SuccessScreen({
+  language,
+  onFinish,
+  checkedOut = false,
+}: SuccessProps) {
   const t = copy[language];
   return (
     <main className="success-page">
@@ -315,8 +328,8 @@ export function SuccessScreen({ language, onFinish }: SuccessProps) {
           <Check size={34} aria-hidden="true" />
         </div>
         <p className="success-eyebrow">{t.complimentary}</p>
-        <h1>{t.successTitle}</h1>
-        <p>{t.successBody}</p>
+        <h1>{checkedOut ? t.checkoutSuccessTitle : t.successTitle}</h1>
+        <p>{checkedOut ? t.checkoutSuccessBody : t.successBody}</p>
         <p className="success-reset-note">{t.autoReset}</p>
         <KioskButton variant="primary" size="lg" onPress={onFinish}>
           {t.successDone}
@@ -332,6 +345,7 @@ interface WelcomeProps {
   onLanguageChange: (language: Language) => void;
   onThemeToggle: () => void;
   onStart: () => void;
+  onStartCheckout: () => void;
 }
 
 export function WelcomeScreen({
@@ -340,6 +354,7 @@ export function WelcomeScreen({
   onLanguageChange,
   onThemeToggle,
   onStart,
+  onStartCheckout,
 }: WelcomeProps) {
   const t = copy[language];
   return (
@@ -407,6 +422,15 @@ export function WelcomeScreen({
           <KioskButton variant="primary" size="lg" fullWidth onPress={onStart}>
             {t.start}
             <span aria-hidden="true">→</span>
+          </KioskButton>
+          <KioskButton
+            variant="secondary"
+            size="lg"
+            fullWidth
+            className="welcome-checkout"
+            onPress={onStartCheckout}
+          >
+            {t.startCheckout}
           </KioskButton>
           <div className="welcome-assurance">
             <ShieldCheck size={17} aria-hidden="true" />

@@ -5,7 +5,9 @@ Base path: `/api/v1`. Requests and responses use JSON. Springdoc serves the Open
 | Method | Path | Purpose | Access |
 | --- | --- | --- | --- |
 | `POST` | `/bookings/lookup` | Find a confirmed booking by code or last name plus phone | Public kiosk |
+| `POST` | `/bookings/checkout-lookup` | Find an active checked-in stay for checkout | Public kiosk |
 | `POST` | `/checkins` | Check in and assign an available matching room | Public kiosk; requires `Idempotency-Key` |
+| `POST` | `/checkouts` | Check out a stay, record its checkout time, and release the room | Public kiosk |
 | `GET` | `/checkins/{id}` | Read a completed check-in | Public kiosk |
 | `GET` | `/rooms` | List rooms and availability | `X-Admin-Key` |
 | `GET` | `/status` | API, database, and maintenance state | Public, remains available in maintenance |
@@ -45,6 +47,10 @@ Idempotency-Key: kiosk-session-unique-key
 ```
 
 The same key and request return the original check-in on retry. A key reused for another booking returns a conflict.
+
+## Check out
+
+The kiosk finds active stays through `POST /api/v1/bookings/checkout-lookup` using the same booking-code or guest-details payload as regular lookup. To finish checkout, it posts `{"bookingId":"<booking UUID>"}` to `POST /api/v1/checkouts`. The operation is transactional: it marks the booking `CHECKED_OUT`, records `checked_out_at` on its check-in row, and returns the assigned room to `AVAILABLE`.
 
 ```json
 {

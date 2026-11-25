@@ -36,6 +36,17 @@ public class KioskController {
     return bookingService.lookup(request);
   }
 
+  @PostMapping("/bookings/checkout-lookup")
+  public BookingResponse checkoutLookup(@Valid @RequestBody BookingLookupRequest request) {
+    return bookingService.lookupForCheckout(request);
+  }
+
+  @PostMapping("/checkouts")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void checkOut(@Valid @RequestBody CheckinRequest request) {
+    checkinService.checkOut(request);
+  }
+
   @PostMapping("/checkins")
   public CheckinResponse checkIn(
       @Valid @RequestBody CheckinRequest request,

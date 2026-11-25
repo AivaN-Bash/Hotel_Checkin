@@ -7,6 +7,7 @@ export type KioskStep =
   | "assigned"
   | "success";
 export type LookupMethod = "code" | "guest";
+export type KioskMode = "checkin" | "checkout";
 
 export interface BookingDetails {
   id: string;
@@ -29,6 +30,7 @@ export interface CheckinDetails {
 
 export interface KioskState {
   step: KioskStep;
+  mode: KioskMode;
   language: "en" | "th";
   theme: "light" | "dark";
   lookupMethod: LookupMethod;
@@ -44,6 +46,7 @@ export interface KioskState {
 
 export type KioskAction =
   | { type: "SET_LANGUAGE"; language: "en" | "th" }
+  | { type: "SET_MODE"; mode: KioskMode }
   | { type: "TOGGLE_THEME" }
   | { type: "SET_LOOKUP_METHOD"; method: LookupMethod }
   | { type: "SET_BOOKING_CODE"; value: string }
@@ -53,6 +56,7 @@ export type KioskAction =
   | { type: "LOOKUP_SUCCEEDED"; booking: BookingDetails }
   | { type: "CHECKIN_STARTED" }
   | { type: "CHECKIN_SUCCEEDED"; checkin: CheckinDetails }
+  | { type: "CHECKOUT_SUCCEEDED" }
   | { type: "REQUEST_FAILED"; code: string; message: string }
   | { type: "CLEAR_ERROR" }
   | { type: "NEXT" }
