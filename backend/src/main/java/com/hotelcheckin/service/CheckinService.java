@@ -2,6 +2,7 @@ package com.hotelcheckin.service;
 
 import com.hotelcheckin.api.dto.CheckinRequest;
 import com.hotelcheckin.api.dto.CheckinResponse;
+import com.hotelcheckin.domain.Booking;
 import com.hotelcheckin.domain.Checkin;
 import com.hotelcheckin.repository.BookingRepository;
 import com.hotelcheckin.repository.CheckinRepository;
@@ -51,7 +52,7 @@ public class CheckinService {
       throw new ApiException(
           HttpStatus.CONFLICT, "ALREADY_CHECKED_IN", "This booking has already been checked in.");
     }
-    if ("CHECKED_IN".equals(booking.getStatus()))
+    if (Booking.STATUS_CHECKED_IN.equals(booking.getStatus()))
       throw new ApiException(
           HttpStatus.CONFLICT, "ALREADY_CHECKED_IN", "This booking has already been checked in.");
     var room =
@@ -84,7 +85,7 @@ public class CheckinService {
                 () ->
                     new ApiException(
                         HttpStatus.NOT_FOUND, "BOOKING_NOT_FOUND", "Booking not found."));
-    if (!"CHECKED_IN".equals(booking.getStatus()))
+    if (!Booking.STATUS_CHECKED_IN.equals(booking.getStatus()))
       throw new ApiException(
           HttpStatus.CONFLICT, "NOT_CHECKED_IN", "This booking is not currently checked in.");
     var checkin =

@@ -3,12 +3,12 @@
 ```mermaid
 flowchart LR
   Guest[Guest on kiosk] --> Vercel[React + Vite static app on Vercel]
-  Vercel -->|HTTPS rewrite /api/*| API[Spring Boot REST API on Koyeb]
+  Vercel -->|HTTPS rewrite /api/*| API[Spring Boot REST API on Render]
   API -->|JDBC + Flyway| DB[(Supabase PostgreSQL)]
   API -->|/api/v1/status and /api/v1/health| Vercel
 ```
 
-The browser owns the temporary kiosk flow and keeps no booking data in persistent browser storage. The API validates requests and returns DTOs. PostgreSQL is authoritative for booking and room state. A transaction locks the booking and selects a compatible room with `FOR UPDATE SKIP LOCKED`, so concurrent check-ins cannot assign the same room. An idempotency key makes retries return the original result.
+The browser owns the temporary kiosk flow and keeps no booking data in persistent browser storage. The API validates requests and returns DTOs. PostgreSQL is authoritative for booking and room state. A check-in transaction locks the booking and selects a compatible room with `FOR UPDATE SKIP LOCKED`, so concurrent check-ins cannot assign the same room. An idempotency key makes check-in retries return the original result. Checkout locks the booking, records `checked_out_at`, marks the booking `CHECKED_OUT`, and makes its room available in the same transaction.
 
 The runtime maintenance switch lives in memory so it remains usable while PostgreSQL is unavailable. The status endpoint has a short database connection timeout. The frontend polls it, distinguishes a cold start from a sustained outage, and preserves the guest's current step for up to five minutes.
 
@@ -17,7 +17,7 @@ The runtime maintenance switch lives in memory so it remains usable while Postgr
 ```mermaid
 erDiagram
   BOOKINGS ||--o| CHECKINS : receives
-  ROOMS ||--o| CHECKINS : assigned_to
+  ROOMS ||--o{ CHECKINS : assigned_to
   BOOKINGS {
     uuid id PK
     string booking_code UK
@@ -43,6 +43,7 @@ erDiagram
     uuid room_id FK
     string idempotency_key UK
     timestamp created_at
+    timestamp checked_out_at
   }
 ```
 

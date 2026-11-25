@@ -141,7 +141,7 @@ function KioskApp() {
   const finishCheckout = async () => {
     if (!flow.booking || requestInProgress.current) return;
     requestInProgress.current = true;
-    dispatch({ type: "CHECKIN_STARTED" });
+    dispatch({ type: "CHECKOUT_STARTED" });
     try {
       await completeCheckout(flow.booking.id);
       dispatch({ type: "CHECKOUT_SUCCEEDED" });
@@ -316,6 +316,8 @@ function readError(
       return { code: error.body.code, message: t.errorNotFound };
     if (error.body.code === "ALREADY_CHECKED_IN")
       return { code: error.body.code, message: t.errorAlready };
+    if (error.body.code === "BOOKING_NOT_AVAILABLE_FOR_CHECKIN")
+      return { code: error.body.code, message: t.errorBookingUnavailable };
     if (error.body.code === "NOT_CHECKED_IN")
       return { code: error.body.code, message: t.notCheckedIn };
     if (error.body.code === "VALIDATION_ERROR")

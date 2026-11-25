@@ -54,6 +54,8 @@ export function kioskReducer(
       };
     case "CHECKIN_STARTED":
       return { ...state, busy: true, error: null };
+    case "CHECKOUT_STARTED":
+      return { ...state, busy: true, error: null };
     case "CHECKIN_SUCCEEDED":
       return {
         ...state,

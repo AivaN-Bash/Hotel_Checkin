@@ -7,6 +7,10 @@ import java.util.UUID;
 @Entity
 @Table(name = "bookings")
 public class Booking {
+  public static final String STATUS_CONFIRMED = "CONFIRMED";
+  public static final String STATUS_CHECKED_IN = "CHECKED_IN";
+  public static final String STATUS_CHECKED_OUT = "CHECKED_OUT";
+
   @Id private UUID id;
 
   @Column(name = "booking_code", nullable = false, unique = true)
@@ -75,10 +79,10 @@ public class Booking {
   }
 
   public void markCheckedIn() {
-    status = "CHECKED_IN";
+    status = STATUS_CHECKED_IN;
   }
 
   public void markCheckedOut() {
-    status = "CHECKED_OUT";
+    status = STATUS_CHECKED_OUT;
   }
 }

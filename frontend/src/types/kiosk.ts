@@ -56,6 +56,7 @@ export type KioskAction =
   | { type: "LOOKUP_SUCCEEDED"; booking: BookingDetails }
   | { type: "CHECKIN_STARTED" }
   | { type: "CHECKIN_SUCCEEDED"; checkin: CheckinDetails }
+  | { type: "CHECKOUT_STARTED" }
   | { type: "CHECKOUT_SUCCEEDED" }
   | { type: "REQUEST_FAILED"; code: string; message: string }
   | { type: "CLEAR_ERROR" }

@@ -31,7 +31,7 @@ management:
       probes:
         enabled: true
 app:
-  cors-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  cors-origins: "${CORS_ALLOWED_ORIGINS:http://localhost:5173,https://frontend-nine-kohl-nzqk24mi4s.vercel.app}"
   maintenance:
     enabled: ${MAINTENANCE_MODE:false}
   admin:

@@ -16,6 +16,8 @@ export const copy = {
     checkoutSuccessTitle: "You’re checked out",
     checkoutSuccessBody: "Thank you for staying with The Aster.",
     notCheckedIn: "This booking is not currently checked in.",
+    errorBookingUnavailable:
+      "This booking is not available for check-in. For an active stay, choose check-out.",
     secure: "Private, secure & ready when you are",
     steps: [
       "Find booking",
@@ -103,6 +105,7 @@ export const copy = {
     checkoutSuccessTitle: "เช็กเอาต์เรียบร้อยแล้ว",
     checkoutSuccessBody: "ขอบคุณที่เข้าพักกับเดอะ แอสเตอร์",
     notCheckedIn: "การจองนี้ยังไม่ได้เช็กอิน",
+    errorBookingUnavailable: "การจองนี้ไม่สามารถเช็กอินได้ หากเข้าพักอยู่ให้เลือกเช็กเอาต์",
     secure: "เป็นส่วนตัว ปลอดภัย และพร้อมเมื่อคุณต้องการ",
     steps: [
       "ค้นหาการจอง",

@@ -58,4 +58,21 @@ class BookingServiceTest {
                     null, " Rivera ", "+66 0000-00001"))
             .guestName());
   }
+
+  @Test
+  void rejectsCheckedOutBookingsForCheckin() {
+    Booking booking = mock(Booking.class);
+    when(repository.findByBookingCodeIgnoreCase("DEMO2026")).thenReturn(Optional.of(booking));
+    when(booking.getStatus()).thenReturn(Booking.STATUS_CHECKED_OUT);
+
+    ApiException exception =
+        assertThrows(
+            ApiException.class,
+            () ->
+                service.lookup(
+                    new com.hotelcheckin.api.dto.BookingLookupRequest("DEMO2026", null, null)));
+
+    assertEquals(HttpStatus.CONFLICT, exception.getStatus());
+    assertEquals("BOOKING_NOT_AVAILABLE_FOR_CHECKIN", exception.getCode());
+  }
 }

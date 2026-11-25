@@ -16,14 +16,14 @@ public class BookingService {
   }
 
   public BookingResponse lookup(BookingLookupRequest request) {
-    return lookup(request, false);
+    return lookup(request, LookupPurpose.CHECK_IN);
   }
 
   public BookingResponse lookupForCheckout(BookingLookupRequest request) {
-    return lookup(request, true);
+    return lookup(request, LookupPurpose.CHECK_OUT);
   }
 
-  private BookingResponse lookup(BookingLookupRequest request, boolean checkout) {
+  private BookingResponse lookup(BookingLookupRequest request, LookupPurpose purpose) {
     boolean byCode = request.hasCode();
     if (byCode == request.hasNameAndPhone()) {
       throw new ApiException(
@@ -42,18 +42,27 @@ public class BookingService {
                         HttpStatus.NOT_FOUND,
                         "BOOKING_NOT_FOUND",
                         "We couldn't find that booking. Check the details and try again."));
-    if (checkout && !"CHECKED_IN".equals(booking.getStatus())) {
+    if (purpose == LookupPurpose.CHECK_OUT
+        && !Booking.STATUS_CHECKED_IN.equals(booking.getStatus())) {
       throw new ApiException(
           HttpStatus.CONFLICT, "NOT_CHECKED_IN", "This booking is not currently checked in.");
     }
-    if (!checkout && "CHECKED_IN".equals(booking.getStatus())) {
+    if (purpose == LookupPurpose.CHECK_IN
+        && !Booking.STATUS_CONFIRMED.equals(booking.getStatus())) {
       throw new ApiException(
-          HttpStatus.CONFLICT, "ALREADY_CHECKED_IN", "This booking has already been checked in.");
+          HttpStatus.CONFLICT,
+          "BOOKING_NOT_AVAILABLE_FOR_CHECKIN",
+          "This booking is not available for check-in.");
     }
     return BookingResponse.from(booking);
   }
 
   private String normalizePhone(String phone) {
     return phone.replaceAll("[(). -]", "");
+  }
+
+  private enum LookupPurpose {
+    CHECK_IN,
+    CHECK_OUT
   }
 }

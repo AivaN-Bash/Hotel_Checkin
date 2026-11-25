@@ -44,6 +44,23 @@ The UI follows the current [HeroUI v3 quick start](https://heroui.com/en/docs/re
 9. **Customization:** hotel colors, spacing, radius, light/dark mode, and reduced-motion rules live in `frontend/src/theme/hotel.css`.
 10. **Extensibility:** `KioskButton` and `StepCard` extend HeroUI v3 variants with `tailwind-variants`.
 
+## Project structure
+
+| Path | Responsibility |
+| --- | --- |
+| `frontend/src/App.tsx` | Connects kiosk state, service status, and journey screens |
+| `frontend/src/hooks/useKioskFlow.ts` | Owns the check-in/check-out reducer and transitions |
+| `frontend/src/pages/FlowScreens.tsx` | Renders welcome, lookup, review, and completion screens |
+| `frontend/src/api/` | Sends typed requests through the shared API client |
+| `frontend/src/i18n/` | English and Thai kiosk copy |
+| `backend/.../api/` | HTTP routes, request validation, and safe errors |
+| `backend/.../service/` | Booking, room, check-in, checkout, and status logic |
+| `backend/.../repository/` | Database queries and transaction locks |
+| `backend/src/main/resources/db/migration/` | Versioned PostgreSQL schema and demo fixtures |
+| `frontend/src/**/*.test.tsx`, `backend/src/test/` | UI, API, and service verification |
+
+Keep changes in the layer that owns the behavior: screens present state, services enforce business rules, repositories perform database access, and Flyway migrations evolve persistent data.
+
 ## Kiosk flow
 
 | Screen | Primary action | Secondary action | Tertiary action |
@@ -138,7 +155,7 @@ Errors use `{ "timestamp", "status", "code", "message" }`. Entities are not seri
 
 The live demo uses Vercel for the frontend, Render for the Spring Boot API, and Supabase PostgreSQL for persistence. Render deploys the `backend/` Docker service from `main`; Vercel builds the `frontend/` Vite app from `main`. The rewrite in `frontend/vercel.json` sends `/api/*` requests to Render. Flyway applies schema and demo-data migrations when the API starts.
 
-Render requires `SPRING_PROFILES_ACTIVE=prod`, `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `ADMIN_API_KEY`, `MAINTENANCE_MODE`, and `CORS_ALLOWED_ORIGINS`. Keep credentials in Render environment settings, never in Git. Set the CORS value to the Vercel site origin only, without `/api` or a trailing slash. Check `https://hotel-checkin-1iql.onrender.com/api/v1/status` and the Vercel `/api/v1/status` route; both should report API and database `UP`.
+Render requires `SPRING_PROFILES_ACTIVE=prod`, `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `ADMIN_API_KEY`, and `MAINTENANCE_MODE`. `CORS_ALLOWED_ORIGINS` defaults to the live Vercel origin plus local Vite; set it to a comma-separated exact-origin allowlist when using another domain. Never commit credentials. Check `https://hotel-checkin-1iql.onrender.com/api/v1/status` and the Vercel `/api/v1/status` route; both should report API and database `UP`.
 
 For a demo, use `DEMO2026` or `DEMO2027` to check in and `DEMO2028` to check out. After checkout, the booking is `CHECKED_OUT`, `checkins.checked_out_at` is populated, and its room is `AVAILABLE` in Supabase.
 
