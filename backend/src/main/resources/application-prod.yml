@@ -8,5 +8,8 @@ spring:
       connection-timeout: 2000
       validation-timeout: 1500
       maximum-pool-size: 5
+      data-source-properties:
+        connectTimeout: 2
+        socketTimeout: 2
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect

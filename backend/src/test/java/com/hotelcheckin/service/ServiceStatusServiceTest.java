@@ -10,8 +10,10 @@ class ServiceStatusServiceTest {
   @Test
   void reportsDatabaseFailureAsDegradedWithoutThrowing() {
     JdbcTemplate jdbc = mock(JdbcTemplate.class);
-    when(jdbc.queryForObject("SELECT 1", Integer.class)).thenThrow(new org.springframework.dao.DataAccessResourceFailureException("unavailable"));
+    when(jdbc.queryForObject("SELECT 1", Integer.class))
+        .thenThrow(new org.springframework.dao.DataAccessResourceFailureException("unavailable"));
     var response = new ServiceStatusService(jdbc, new MaintenanceState(false)).getStatus();
+    verify(jdbc).setQueryTimeout(2);
     assertEquals("DEGRADED", response.status());
     assertEquals("DOWN", response.components().database());
     assertNotNull(response.checkedAt());

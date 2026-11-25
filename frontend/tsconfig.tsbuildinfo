@@ -1,1 +1,0 @@
-{"root":["./src/app.test.tsx","./src/app.tsx","./src/counter.ts","./src/main.tsx","./src/api/client.test.ts","./src/api/client.ts","./src/components/maintenancescreen.tsx","./src/hooks/useservicestatus.test.tsx","./src/hooks/useservicestatus.ts","./src/i18n/maintenance.ts","./src/test/setup.ts","./src/types/service.ts","./vite.config.ts"],"version":"5.9.3"}

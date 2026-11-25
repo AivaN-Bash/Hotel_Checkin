@@ -8,11 +8,22 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
   private final String[] allowedOrigins;
+
   public WebConfig(@Value("${app.cors-origins}") String configuredOrigins) {
-    this.allowedOrigins = configuredOrigins.split(",");
+    this.allowedOrigins =
+        java.util.Arrays.stream(configuredOrigins.split(","))
+            .map(String::trim)
+            .filter(origin -> !origin.isBlank())
+            .toArray(String[]::new);
   }
+
   @Override
   public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/api/**").allowedOrigins(allowedOrigins).allowedMethods("GET", "POST", "OPTIONS").allowedHeaders("Content-Type", "Idempotency-Key", "X-Admin-Key").maxAge(3600);
+    registry
+        .addMapping("/api/**")
+        .allowedOrigins(allowedOrigins)
+        .allowedMethods("GET", "POST", "OPTIONS")
+        .allowedHeaders("Content-Type", "Idempotency-Key", "X-Admin-Key")
+        .maxAge(3600);
   }
 }

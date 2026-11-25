@@ -21,18 +21,35 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class MaintenanceFilter extends OncePerRequestFilter {
   private final MaintenanceState state;
   private final ObjectMapper mapper;
-  public MaintenanceFilter(MaintenanceState state, ObjectMapper mapper) { this.state = state; this.mapper = mapper; }
+
+  public MaintenanceFilter(MaintenanceState state, ObjectMapper mapper) {
+    this.state = state;
+    this.mapper = mapper;
+  }
+
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+  protected void doFilterInternal(
+      HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+      throws ServletException, IOException {
     String path = request.getRequestURI();
     boolean apiPath = path.startsWith("/api/v1/");
-    boolean exempt = path.equals("/api/v1/status") || path.equals("/api/v1/health") || path.equals("/api/v1/admin/maintenance") || request.getMethod().equals("OPTIONS");
+    boolean exempt =
+        path.equals("/api/v1/status")
+            || path.equals("/api/v1/health")
+            || path.equals("/api/v1/admin/maintenance")
+            || request.getMethod().equals("OPTIONS");
     var current = state.get();
     if (apiPath && !exempt && current.enabled()) {
       response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
       response.setContentType("application/json");
       response.setCharacterEncoding("UTF-8");
-      mapper.writeValue(response.getWriter(), new ErrorResponse(OffsetDateTime.now(ZoneOffset.UTC), HttpStatus.SERVICE_UNAVAILABLE.value(), "MAINTENANCE", current.message()));
+      mapper.writeValue(
+          response.getWriter(),
+          new ErrorResponse(
+              OffsetDateTime.now(ZoneOffset.UTC),
+              HttpStatus.SERVICE_UNAVAILABLE.value(),
+              "MAINTENANCE",
+              current.message()));
       return;
     }
     chain.doFilter(request, response);
