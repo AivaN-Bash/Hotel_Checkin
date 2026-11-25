@@ -22,7 +22,12 @@ public class CheckinService {
   @Transactional
   public CheckinResponse checkIn(CheckinRequest request, String idempotencyKey) {
     var priorRequest = checkins.findByIdempotencyKey(idempotencyKey);
-    if (priorRequest.isPresent()) return CheckinResponse.from(priorRequest.get());
+    if (priorRequest.isPresent()) {
+      if (!priorRequest.get().getBooking().getId().equals(request.bookingId())) {
+        throw new ApiException(HttpStatus.CONFLICT, "IDEMPOTENCY_KEY_REUSED", "This request key is already associated with another booking.");
+      }
+      return CheckinResponse.from(priorRequest.get());
+    }
     var booking = bookings.findLockedById(request.bookingId()).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "BOOKING_NOT_FOUND", "Booking not found."));
     var completed = checkins.findByBookingId(booking.getId());
     if (completed.isPresent()) {

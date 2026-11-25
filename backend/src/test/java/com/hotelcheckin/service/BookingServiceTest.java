@@ -26,4 +26,18 @@ class BookingServiceTest {
     ApiException exception = assertThrows(ApiException.class, () -> service.lookup(new com.hotelcheckin.api.dto.BookingLookupRequest("CODE", "Name", "+66000000001")));
     assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
   }
+
+  @Test
+  void trimsAndNormalizesPhoneLookup() {
+    Booking booking = mock(Booking.class);
+    when(repository.findByGuestLastNameIgnoreCaseAndPhoneNumber("Rivera", "+66000000001")).thenReturn(Optional.of(booking));
+    when(booking.getStatus()).thenReturn("CONFIRMED");
+    when(booking.getGuestFirstName()).thenReturn("Alex");
+    when(booking.getGuestLastName()).thenReturn("Rivera");
+    when(booking.getRoomType()).thenReturn("Deluxe King");
+    when(booking.getCheckInDate()).thenReturn(java.time.LocalDate.now());
+    when(booking.getCheckOutDate()).thenReturn(java.time.LocalDate.now().plusDays(2));
+    when(booking.getGuestCount()).thenReturn(2);
+    assertEquals("Alex Rivera", service.lookup(new com.hotelcheckin.api.dto.BookingLookupRequest(null, " Rivera ", "+66 0000-00001")).guestName());
+  }
 }

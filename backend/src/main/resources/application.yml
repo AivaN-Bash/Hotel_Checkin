@@ -13,6 +13,11 @@ spring:
           time_zone: UTC
   flyway:
     enabled: true
+  datasource:
+    hikari:
+      connection-timeout: 2000
+      validation-timeout: 1500
+      maximum-pool-size: 5
 server:
   port: ${PORT:8080}
   forward-headers-strategy: framework
