@@ -76,7 +76,7 @@ Keep changes in the layer that owns the behavior: screens present state, service
 
 Choose **Begin check-in** for a confirmed booking or **Begin check-out** for a guest who is already checked in. Check-out skips the identity and deposit demo steps, asks the guest to confirm, then releases the assigned room. Its progress indicator shows the three checkout steps; check-in shows six steps. Inactivity resets the guest's session at 60 seconds; maintenance pauses that timer. Successful check-in and check-out return to Welcome after a short confirmation.
 
-The demo bookings are persistent database records, not reusable examples: `DEMO2026` and `DEMO2027` start confirmed for check-in, while `DEMO2028` starts checked in for checkout. Each can complete its matching transaction only once. Migration V4 restores only these demo records once; it preserves other bookings and active room assignments. The local development database is in-memory and is reseeded when the backend restarts; after V4 runs, hosted demo state persists and must be deliberately restored before reusing a completed booking.
+The demo bookings are persistent database records: `DEMO2026` and `DEMO2027` start confirmed for check-in, while `DEMO2028` starts checked in for checkout. To make hosted demos repeatable, the next matching lookup restores a completed demo stay: check-in lookup resets `DEMO2026`/`DEMO2027`, and checkout lookup re-arms `DEMO2028` in an available room. This behavior applies only to these exact seeded demo codes; real guest bookings and completed stay records remain unchanged. The local development database is also reseeded when the backend restarts.
 
 ## Resilience and maintenance mode
 
@@ -159,7 +159,7 @@ The live demo uses Vercel for the frontend, Render for the Spring Boot API, and 
 
 Render requires `SPRING_PROFILES_ACTIVE=prod`, `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `ADMIN_API_KEY`, and `MAINTENANCE_MODE`. `CORS_ALLOWED_ORIGINS` defaults to the live Vercel origin plus local Vite; set it to a comma-separated exact-origin allowlist when using another domain. Never commit credentials. Check `https://hotel-checkin-1iql.onrender.com/api/v1/status` and the Vercel `/api/v1/status` route; both should report API and database `UP`.
 
-For a demo, use `DEMO2026` or `DEMO2027` to check in and `DEMO2028` to check out. After checkout, the booking is `CHECKED_OUT`, `checkins.checked_out_at` is populated, and its room is `AVAILABLE` in Supabase.
+For a demo, use `DEMO2026` or `DEMO2027` to check in and `DEMO2028` to check out. After checkout, the booking is `CHECKED_OUT`, `checkins.checked_out_at` is populated, and its room is `AVAILABLE` until the next matching demo lookup re-arms it.
 
 ## Security and known limits
 

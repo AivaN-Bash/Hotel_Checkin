@@ -82,6 +82,10 @@ public class Booking {
     status = STATUS_CHECKED_IN;
   }
 
+  public void markConfirmed() {
+    status = STATUS_CONFIRMED;
+  }
+
   public void markCheckedOut() {
     status = STATUS_CHECKED_OUT;
   }

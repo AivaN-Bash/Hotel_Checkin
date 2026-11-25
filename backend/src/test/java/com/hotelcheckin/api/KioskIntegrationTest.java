@@ -13,10 +13,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("dev")
+@Transactional
 class KioskIntegrationTest {
   @Autowired private MockMvc mockMvc;
 
@@ -94,8 +96,43 @@ class KioskIntegrationTest {
         .andExpect(jsonPath("$.code").value("NOT_CHECKED_IN"));
 
     mockMvc
+        .perform(
+            post("/api/v1/bookings/lookup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"bookingCode\":\"DEMO2026\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.guestName").value("Alex Rivera"));
+
+    mockMvc
+        .perform(
+            post("/api/v1/checkins")
+                .header("Idempotency-Key", "integration-second-stay")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"bookingId\":\"10000000-0000-0000-0000-000000000001\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.roomNumber").value("201"));
+
+    mockMvc
         .perform(get("/api/v1/rooms"))
         .andExpect(status().isServiceUnavailable())
         .andExpect(jsonPath("$.code").value("ADMIN_NOT_CONFIGURED"));
+  }
+
+  @Test
+  void makesTheCheckoutDemoReusableAfterCheckout() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/v1/checkouts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"bookingId\":\"10000000-0000-0000-0000-000000000003\"}"))
+        .andExpect(status().isNoContent());
+
+    mockMvc
+        .perform(
+            post("/api/v1/bookings/checkout-lookup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"bookingCode\":\"DEMO2028\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.guestName").value("Taylor Chen"));
   }
 }
