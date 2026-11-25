@@ -1,31 +1,40 @@
 import { ProgressBar } from "@heroui/react";
-import type { KioskStep } from "../types/kiosk";
+import type { KioskMode, KioskStep } from "../types/kiosk";
 
-const ORDER: readonly KioskStep[] = [
-  "lookup",
-  "confirm",
-  "verification",
-  "deposit",
-  "assigned",
-  "success",
-];
+const ORDER: Record<KioskMode, readonly KioskStep[]> = {
+  checkin: [
+    "lookup",
+    "confirm",
+    "verification",
+    "deposit",
+    "assigned",
+    "success",
+  ],
+  checkout: ["lookup", "confirm", "success"],
+};
 
 interface StepProgressProps {
   step: KioskStep;
   labels: string[];
+  mode?: KioskMode;
 }
 
-export function StepProgress({ step, labels }: StepProgressProps) {
-  const currentIndex = Math.max(0, ORDER.indexOf(step));
+export function StepProgress({
+  step,
+  labels,
+  mode = "checkin",
+}: StepProgressProps) {
+  const steps = ORDER[mode];
+  const currentIndex = Math.max(0, steps.indexOf(step));
   const value =
     step === "success"
       ? 100
-      : Math.round(((currentIndex + 1) / ORDER.length) * 100);
+      : Math.round(((currentIndex + 1) / steps.length) * 100);
   return (
     <div
       className="progress-wrap"
       role="group"
-      aria-label={`Step ${currentIndex + 1} of ${ORDER.length}`}
+      aria-label={`Step ${currentIndex + 1} of ${steps.length}`}
     >
       <div className="progress-labels" aria-hidden="true">
         {labels.map((label, index) => (

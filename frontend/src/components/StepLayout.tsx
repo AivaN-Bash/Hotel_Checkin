@@ -1,7 +1,7 @@
 import { Button, Card } from "@heroui/react";
 import { ArrowLeft, Moon, Sun } from "lucide-react";
 import { copy } from "../i18n/kiosk";
-import type { KioskStep } from "../types/kiosk";
+import type { KioskMode, KioskStep } from "../types/kiosk";
 import type { Language } from "../types/service";
 import { KioskButton } from "./KioskButton";
 import { StepCard } from "./StepCard";
@@ -9,6 +9,7 @@ import { StepProgress } from "./StepProgress";
 
 interface StepLayoutProps {
   step: KioskStep;
+  mode?: KioskMode;
   language: Language;
   theme: "light" | "dark";
   title: string;
@@ -27,6 +28,7 @@ interface StepLayoutProps {
 
 export function StepLayout({
   step,
+  mode = "checkin",
   language,
   theme,
   title,
@@ -43,6 +45,11 @@ export function StepLayout({
   primaryDisabled,
 }: StepLayoutProps) {
   const t = copy[language];
+  const steps: readonly KioskStep[] =
+    mode === "checkout"
+      ? ["lookup", "confirm", "success"]
+      : ["lookup", "confirm", "verification", "deposit", "assigned", "success"];
+  const stepIndex = Math.max(0, steps.indexOf(step));
   return (
     <main className="kiosk-page">
       <header className="kiosk-header">
@@ -80,24 +87,16 @@ export function StepLayout({
         </div>
       </header>
       <div className="kiosk-content">
-        <StepProgress step={step} labels={t.steps as string[]} />
+        <StepProgress
+          step={step}
+          labels={(mode === "checkout" ? t.checkoutSteps : t.steps) as string[]}
+          mode={mode}
+        />
         <StepCard className="flow-card">
           <Card.Header className="flow-card-heading">
             <div className="step-index">
-              {String(
-                Math.max(
-                  1,
-                  [
-                    "lookup",
-                    "confirm",
-                    "verification",
-                    "deposit",
-                    "assigned",
-                    "success",
-                  ].indexOf(step) + 1,
-                ),
-              ).padStart(2, "0")}{" "}
-              <span>/ 06</span>
+              {String(stepIndex + 1).padStart(2, "0")}{" "}
+              <span>/ {String(steps.length).padStart(2, "0")}</span>
             </div>
             <h1>{title}</h1>
             {subtitle && <p>{subtitle}</p>}

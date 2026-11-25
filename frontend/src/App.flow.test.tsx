@@ -49,6 +49,11 @@ describe("self check-in journey", () => {
     await user.click(
       await screen.findByRole("button", { name: "Begin check-in" }),
     );
+    expect(
+      screen.getByText(
+        "Check-in demo: DEMO2026 or DEMO2027 (confirmed bookings).",
+      ),
+    ).toBeInTheDocument();
     await user.type(screen.getByLabelText("Booking code"), "DEMO2026");
     await user.click(screen.getByRole("button", { name: "Find my booking" }));
     expect(
@@ -122,10 +127,24 @@ describe("self check-in journey", () => {
     await user.click(
       await screen.findByRole("button", { name: "Begin check-out" }),
     );
+    expect(
+      screen.getByRole("heading", { name: "Find your active stay" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Check-out demo: DEMO2028 (the active checked-in booking).",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "Step 1 of 3" }),
+    ).toBeInTheDocument();
     await user.type(screen.getByLabelText("Booking code"), "DEMO2028");
     await user.click(screen.getByRole("button", { name: "Find my booking" }));
     expect(
       await screen.findByRole("heading", { name: "Ready to check out?" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "Step 2 of 3" }),
     ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Confirm check-out" }));
     expect(

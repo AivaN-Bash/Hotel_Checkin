@@ -10,14 +10,18 @@ export const copy = {
       "A thoughtful welcome is just a few steps away. Check in at your own pace.",
     start: "Begin check-in",
     startCheckout: "Begin check-out",
+    checkoutFindTitle: "Find your active stay",
+    checkoutFindBody:
+      "Use the booking code or guest details for a reservation that is currently checked in.",
     checkoutTitle: "Ready to check out?",
     checkoutBody: "Review your stay, then confirm your check-out.",
     checkoutConfirm: "Confirm check-out",
     checkoutSuccessTitle: "You’re checked out",
     checkoutSuccessBody: "Thank you for staying with The Aster.",
-    notCheckedIn: "This booking is not currently checked in.",
+    notCheckedIn:
+      "This booking is not currently checked in. Use an active stay to check out.",
     errorBookingUnavailable:
-      "This booking is not available for check-in. For an active stay, choose check-out.",
+      "This booking cannot be checked in. If the stay is active, choose check-out; otherwise contact the front desk.",
     secure: "Private, secure & ready when you are",
     steps: [
       "Find booking",
@@ -27,6 +31,7 @@ export const copy = {
       "Your room",
       "Complete",
     ],
+    checkoutSteps: ["Find stay", "Review stay", "Complete"],
     back: "Back",
     cancel: "Start over",
     continue: "Continue",
@@ -43,6 +48,10 @@ export const copy = {
     phonePlaceholder: "+66 000 000 000",
     lookup: "Find my booking",
     lookupHelp: "Your phone number is only used to find this reservation.",
+    demoCheckInHint:
+      "Check-in demo: DEMO2026 or DEMO2027 (confirmed bookings).",
+    demoCheckOutHint:
+      "Check-out demo: DEMO2028 (the active checked-in booking).",
     confirmTitle: "Please review your stay",
     confirmBody: "Make sure these details look right before continuing.",
     guestName: "Guest",
@@ -77,7 +86,7 @@ export const copy = {
     errorNotFound:
       "Check the details and try again, or ask the front desk for help.",
     errorAlready:
-      "This booking has already been checked in. Please visit the front desk if you need assistance.",
+      "This booking is already checked in. Choose check-out to end your stay.",
     errorValidation: "Please complete the required details.",
     errorService:
       "The service is temporarily unavailable. Your details are still here; please try again.",
@@ -99,13 +108,16 @@ export const copy = {
     welcomeBody: "ต้อนรับคุณอย่างใส่ใจ เช็กอินได้ตามจังหวะที่คุณสะดวก",
     start: "เริ่มเช็กอิน",
     startCheckout: "เริ่มเช็กเอาต์",
+    checkoutFindTitle: "ค้นหาการเข้าพักที่กำลังดำเนินอยู่",
+    checkoutFindBody: "ใช้รหัสการจอง หรือชื่อและหมายเลขโทรศัพท์ของการจองที่เช็กอินแล้ว",
     checkoutTitle: "พร้อมเช็กเอาต์หรือยัง?",
     checkoutBody: "ตรวจสอบข้อมูลการเข้าพัก แล้วกดยืนยันการเช็กเอาต์",
     checkoutConfirm: "ยืนยันการเช็กเอาต์",
     checkoutSuccessTitle: "เช็กเอาต์เรียบร้อยแล้ว",
     checkoutSuccessBody: "ขอบคุณที่เข้าพักกับเดอะ แอสเตอร์",
-    notCheckedIn: "การจองนี้ยังไม่ได้เช็กอิน",
-    errorBookingUnavailable: "การจองนี้ไม่สามารถเช็กอินได้ หากเข้าพักอยู่ให้เลือกเช็กเอาต์",
+    notCheckedIn: "การจองนี้ยังไม่ได้เช็กอิน โปรดใช้การจองที่กำลังเข้าพักเพื่อเช็กเอาต์",
+    errorBookingUnavailable:
+      "การจองนี้ไม่สามารถเช็กอินได้ หากกำลังเข้าพักให้เลือกเช็กเอาต์ หรือสอบถามแผนกต้อนรับ",
     secure: "เป็นส่วนตัว ปลอดภัย และพร้อมเมื่อคุณต้องการ",
     steps: [
       "ค้นหาการจอง",
@@ -115,6 +127,7 @@ export const copy = {
       "ห้องพัก",
       "เสร็จสิ้น",
     ],
+    checkoutSteps: ["ค้นหาการเข้าพัก", "ตรวจสอบข้อมูล", "เสร็จสิ้น"],
     back: "ย้อนกลับ",
     cancel: "เริ่มใหม่",
     continue: "ดำเนินการต่อ",
@@ -130,6 +143,8 @@ export const copy = {
     phonePlaceholder: "+66 000 000 000",
     lookup: "ค้นหาการจอง",
     lookupHelp: "เราใช้หมายเลขโทรศัพท์เพื่อค้นหาการจองนี้เท่านั้น",
+    demoCheckInHint: "สาธิตเช็กอิน: ใช้ DEMO2026 หรือ DEMO2027 (การจองที่ยืนยันแล้ว)",
+    demoCheckOutHint: "สาธิตเช็กเอาต์: ใช้ DEMO2028 (การจองที่เช็กอินแล้ว)",
     confirmTitle: "โปรดตรวจสอบรายละเอียดการเข้าพัก",
     confirmBody: "ตรวจสอบข้อมูลก่อนดำเนินการต่อ",
     guestName: "ผู้เข้าพัก",
@@ -159,7 +174,7 @@ export const copy = {
     errorTitle: "ไม่พบการจองนี้",
     errorUnknown: "เกิดข้อผิดพลาด โปรดลองอีกครั้งหรือติดต่อแผนกต้อนรับ",
     errorNotFound: "ตรวจสอบข้อมูลแล้วลองอีกครั้ง หรือติดต่อแผนกต้อนรับ",
-    errorAlready: "การจองนี้เช็กอินแล้ว หากต้องการความช่วยเหลือ โปรดติดต่อแผนกต้อนรับ",
+    errorAlready: "การจองนี้เช็กอินแล้ว หากต้องการเช็กเอาต์ โปรดเริ่มรายการเช็กเอาต์",
     errorValidation: "โปรดกรอกข้อมูลที่จำเป็นให้ครบ",
     errorService: "ระบบไม่พร้อมใช้งานชั่วคราว ข้อมูลของคุณยังอยู่ โปรดลองอีกครั้ง",
     idleTitle: "กำลังเช็กอินอยู่หรือไม่",

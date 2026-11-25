@@ -5,13 +5,15 @@ import static org.mockito.Mockito.*;
 
 import com.hotelcheckin.domain.Booking;
 import com.hotelcheckin.repository.BookingRepository;
+import com.hotelcheckin.repository.CheckinRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
 class BookingServiceTest {
   private final BookingRepository repository = mock(BookingRepository.class);
-  private final BookingService service = new BookingService(repository);
+  private final CheckinRepository checkins = mock(CheckinRepository.class);
+  private final BookingService service = new BookingService(repository, checkins);
 
   @Test
   void returnsNotFoundWithoutLeakingLookupDetails() {
@@ -74,5 +76,44 @@ class BookingServiceTest {
 
     assertEquals(HttpStatus.CONFLICT, exception.getStatus());
     assertEquals("BOOKING_NOT_AVAILABLE_FOR_CHECKIN", exception.getCode());
+  }
+
+  @Test
+  void rejectsAConfirmedBookingThatAlreadyHasACheckinRecord() {
+    Booking booking = mock(Booking.class);
+    when(repository.findByBookingCodeIgnoreCase("DEMO2026")).thenReturn(Optional.of(booking));
+    when(booking.getId()).thenReturn(java.util.UUID.randomUUID());
+    when(booking.getStatus()).thenReturn(Booking.STATUS_CONFIRMED);
+    when(checkins.findByBookingId(booking.getId()))
+        .thenReturn(Optional.of(mock(com.hotelcheckin.domain.Checkin.class)));
+
+    ApiException exception =
+        assertThrows(
+            ApiException.class,
+            () ->
+                service.lookup(
+                    new com.hotelcheckin.api.dto.BookingLookupRequest("DEMO2026", null, null)));
+
+    assertEquals(HttpStatus.CONFLICT, exception.getStatus());
+    assertEquals("ALREADY_CHECKED_IN", exception.getCode());
+  }
+
+  @Test
+  void allowsCheckoutWhenAnActiveCheckinRecordExistsDespiteStaleBookingStatus() {
+    Booking booking = mock(Booking.class);
+    com.hotelcheckin.domain.Checkin checkin = mock(com.hotelcheckin.domain.Checkin.class);
+    when(repository.findByBookingCodeIgnoreCase("DEMO2028")).thenReturn(Optional.of(booking));
+    when(booking.getId()).thenReturn(java.util.UUID.randomUUID());
+    when(booking.getStatus()).thenReturn(Booking.STATUS_CONFIRMED);
+    when(checkins.findByBookingId(booking.getId())).thenReturn(Optional.of(checkin));
+    when(booking.getGuestFirstName()).thenReturn("Taylor");
+    when(booking.getGuestLastName()).thenReturn("Chen");
+
+    assertEquals(
+        "Taylor Chen",
+        service
+            .lookupForCheckout(
+                new com.hotelcheckin.api.dto.BookingLookupRequest("DEMO2028", null, null))
+            .guestName());
   }
 }

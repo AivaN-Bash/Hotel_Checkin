@@ -4,15 +4,18 @@ import com.hotelcheckin.api.dto.BookingLookupRequest;
 import com.hotelcheckin.api.dto.BookingResponse;
 import com.hotelcheckin.domain.Booking;
 import com.hotelcheckin.repository.BookingRepository;
+import com.hotelcheckin.repository.CheckinRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BookingService {
   private final BookingRepository bookings;
+  private final CheckinRepository checkins;
 
-  public BookingService(BookingRepository bookings) {
+  public BookingService(BookingRepository bookings, CheckinRepository checkins) {
     this.bookings = bookings;
+    this.checkins = checkins;
   }
 
   public BookingResponse lookup(BookingLookupRequest request) {
@@ -42,17 +45,25 @@ public class BookingService {
                         HttpStatus.NOT_FOUND,
                         "BOOKING_NOT_FOUND",
                         "We couldn't find that booking. Check the details and try again."));
-    if (purpose == LookupPurpose.CHECK_OUT
-        && !Booking.STATUS_CHECKED_IN.equals(booking.getStatus())) {
+    var checkin = checkins.findByBookingId(booking.getId());
+    boolean activelyCheckedIn = checkin.isPresent() && checkin.get().getCheckedOutAt() == null;
+    if (purpose == LookupPurpose.CHECK_OUT && !activelyCheckedIn) {
       throw new ApiException(
           HttpStatus.CONFLICT, "NOT_CHECKED_IN", "This booking is not currently checked in.");
     }
-    if (purpose == LookupPurpose.CHECK_IN
-        && !Booking.STATUS_CONFIRMED.equals(booking.getStatus())) {
-      throw new ApiException(
-          HttpStatus.CONFLICT,
-          "BOOKING_NOT_AVAILABLE_FOR_CHECKIN",
-          "This booking is not available for check-in.");
+    if (purpose == LookupPurpose.CHECK_IN) {
+      if (activelyCheckedIn) {
+        throw new ApiException(
+            HttpStatus.CONFLICT,
+            "ALREADY_CHECKED_IN",
+            "This booking is already checked in. Start a check-out session to continue.");
+      }
+      if (!Booking.STATUS_CONFIRMED.equals(booking.getStatus()) || checkin.isPresent()) {
+        throw new ApiException(
+            HttpStatus.CONFLICT,
+            "BOOKING_NOT_AVAILABLE_FOR_CHECKIN",
+            "This booking is not available for check-in. Please visit the front desk.");
+      }
     }
     return BookingResponse.from(booking);
   }

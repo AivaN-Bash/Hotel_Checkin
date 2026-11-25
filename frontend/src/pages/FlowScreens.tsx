@@ -11,6 +11,7 @@ import { copy } from "../i18n/kiosk";
 import type {
   BookingDetails,
   CheckinDetails,
+  KioskMode,
   LookupMethod,
 } from "../types/kiosk";
 import type { Language } from "../types/service";
@@ -30,6 +31,7 @@ interface SharedProps {
 }
 
 interface LookupProps extends SharedProps {
+  mode: KioskMode;
   method: LookupMethod;
   bookingCode: string;
   lastName: string;
@@ -50,8 +52,9 @@ export function BookingLookupScreen(props: LookupProps) {
     <StepLayout
       {...shared(props)}
       step="lookup"
-      title={t.findTitle}
-      subtitle={t.findBody}
+      mode={props.mode}
+      title={props.mode === "checkout" ? t.checkoutFindTitle : t.findTitle}
+      subtitle={props.mode === "checkout" ? t.checkoutFindBody : t.findBody}
       primaryLabel={t.lookup}
       primaryFormId={formId}
       onPrimary={() => undefined}
@@ -129,6 +132,9 @@ export function BookingLookupScreen(props: LookupProps) {
         <ShieldCheck size={15} aria-hidden="true" />
         {t.lookupHelp}
       </p>
+      <p className="form-note">
+        {props.mode === "checkout" ? t.demoCheckOutHint : t.demoCheckInHint}
+      </p>
       {props.error && (
         <ErrorMessage
           message={props.error.message}
@@ -163,6 +169,7 @@ export function ConfirmBookingScreen({
     <StepLayout
       {...shared({ ...sharedProps, language })}
       step="confirm"
+      mode={checkout ? "checkout" : "checkin"}
       title={checkout ? t.checkoutTitle : t.confirmTitle}
       subtitle={checkout ? t.checkoutBody : t.confirmBody}
       primaryLabel={checkout ? t.checkoutConfirm : t.reviewContinue}
@@ -321,7 +328,11 @@ export function SuccessScreen({
         <span>{t.hotel}</span>
       </header>
       <div className="success-progress">
-        <StepProgress step="success" labels={t.steps as string[]} />
+        <StepProgress
+          step="success"
+          labels={(checkedOut ? t.checkoutSteps : t.steps) as string[]}
+          mode={checkedOut ? "checkout" : "checkin"}
+        />
       </div>
       <StepCard className="success-card">
         <div className="success-check">

@@ -58,4 +58,59 @@ class CheckinServiceTest {
         "Alex Rivera", service.checkIn(new CheckinRequest(bookingId), "retry-key-123").guestName());
     verifyNoInteractions(rooms);
   }
+
+  @Test
+  void checksOutAnActiveCheckinEvenWhenTheBookingStatusIsStale() {
+    UUID bookingId = UUID.randomUUID();
+    Booking booking = mock(Booking.class);
+    Checkin checkin = mock(Checkin.class);
+    com.hotelcheckin.domain.Room room = mock(com.hotelcheckin.domain.Room.class);
+    when(bookings.findLockedById(bookingId)).thenReturn(Optional.of(booking));
+    when(booking.getId()).thenReturn(bookingId);
+    when(booking.getStatus()).thenReturn(Booking.STATUS_CONFIRMED);
+    when(checkins.findWithRoomByBookingId(bookingId)).thenReturn(Optional.of(checkin));
+    when(checkin.getRoom()).thenReturn(room);
+
+    service.checkOut(new CheckinRequest(bookingId));
+
+    verify(room).markAvailable();
+    verify(checkin).markCheckedOut();
+    verify(booking).markCheckedOut();
+  }
+
+  @Test
+  void doesNotAllowCheckedOutBookingsToCheckInAgain() {
+    UUID bookingId = UUID.randomUUID();
+    Booking booking = mock(Booking.class);
+    when(checkins.findByIdempotencyKey("new-checkin-key")).thenReturn(Optional.empty());
+    when(bookings.findLockedById(bookingId)).thenReturn(Optional.of(booking));
+    when(booking.getId()).thenReturn(bookingId);
+    when(booking.getStatus()).thenReturn(Booking.STATUS_CHECKED_OUT);
+    when(checkins.findByBookingId(bookingId)).thenReturn(Optional.empty());
+
+    ApiException exception =
+        assertThrows(
+            ApiException.class,
+            () -> service.checkIn(new CheckinRequest(bookingId), "new-checkin-key"));
+
+    assertEquals(HttpStatus.CONFLICT, exception.getStatus());
+    assertEquals("BOOKING_NOT_AVAILABLE_FOR_CHECKIN", exception.getCode());
+    verifyNoInteractions(rooms);
+  }
+
+  @Test
+  void returnsNotCheckedInWhenThereIsNoAssignmentForAConfirmedBooking() {
+    UUID bookingId = UUID.randomUUID();
+    Booking booking = mock(Booking.class);
+    when(bookings.findLockedById(bookingId)).thenReturn(Optional.of(booking));
+    when(booking.getId()).thenReturn(bookingId);
+    when(booking.getStatus()).thenReturn(Booking.STATUS_CONFIRMED);
+    when(checkins.findWithRoomByBookingId(bookingId)).thenReturn(Optional.empty());
+
+    ApiException exception =
+        assertThrows(ApiException.class, () -> service.checkOut(new CheckinRequest(bookingId)));
+
+    assertEquals(HttpStatus.CONFLICT, exception.getStatus());
+    assertEquals("NOT_CHECKED_IN", exception.getCode());
+  }
 }

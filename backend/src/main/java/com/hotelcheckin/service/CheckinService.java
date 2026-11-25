@@ -55,6 +55,11 @@ public class CheckinService {
     if (Booking.STATUS_CHECKED_IN.equals(booking.getStatus()))
       throw new ApiException(
           HttpStatus.CONFLICT, "ALREADY_CHECKED_IN", "This booking has already been checked in.");
+    if (!Booking.STATUS_CONFIRMED.equals(booking.getStatus()))
+      throw new ApiException(
+          HttpStatus.CONFLICT,
+          "BOOKING_NOT_AVAILABLE_FOR_CHECKIN",
+          "This booking is not available for check-in.");
     var room =
         rooms
             .findAvailableForUpdate(booking.getRoomType())
@@ -85,20 +90,20 @@ public class CheckinService {
                 () ->
                     new ApiException(
                         HttpStatus.NOT_FOUND, "BOOKING_NOT_FOUND", "Booking not found."));
-    if (!Booking.STATUS_CHECKED_IN.equals(booking.getStatus()))
+    var checkin = checkins.findWithRoomByBookingId(booking.getId());
+    if (checkin.isEmpty()) {
+      if (!Booking.STATUS_CHECKED_IN.equals(booking.getStatus()))
+        throw new ApiException(
+            HttpStatus.CONFLICT, "NOT_CHECKED_IN", "This booking is not currently checked in.");
+      throw new ApiException(
+          HttpStatus.CONFLICT, "CHECKIN_RECORD_MISSING", "No active room assignment was found.");
+    }
+    var activeCheckin = checkin.get();
+    if (activeCheckin.getCheckedOutAt() != null)
       throw new ApiException(
           HttpStatus.CONFLICT, "NOT_CHECKED_IN", "This booking is not currently checked in.");
-    var checkin =
-        checkins
-            .findWithRoomByBookingId(booking.getId())
-            .orElseThrow(
-                () ->
-                    new ApiException(
-                        HttpStatus.CONFLICT,
-                        "CHECKIN_RECORD_MISSING",
-                        "No active room assignment was found."));
-    checkin.getRoom().markAvailable();
-    checkin.markCheckedOut();
+    activeCheckin.getRoom().markAvailable();
+    activeCheckin.markCheckedOut();
     booking.markCheckedOut();
   }
 

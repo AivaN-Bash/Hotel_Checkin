@@ -195,6 +195,7 @@ function KioskApp() {
         <BookingLookupScreen
           language={flow.language}
           theme={flow.theme}
+          mode={flow.mode}
           method={flow.lookupMethod}
           bookingCode={flow.bookingCode}
           lastName={flow.lastName}

@@ -74,7 +74,9 @@ Keep changes in the layer that owns the behavior: screens present state, service
 | Success | Finish | — | — |
 | Maintenance | Try again | Change language | — |
 
-Choose **Begin check-in** for a confirmed booking or **Begin check-out** for a guest who is already checked in. Check-out skips the identity and deposit demo steps, asks the guest to confirm, then releases the assigned room. The six-step indicator, inactivity countdown, English/Thai copy, and light/dark theme support the flow. Inactivity resets the guest's session at 60 seconds; maintenance pauses that timer. Successful check-in and check-out return to Welcome after a short confirmation.
+Choose **Begin check-in** for a confirmed booking or **Begin check-out** for a guest who is already checked in. Check-out skips the identity and deposit demo steps, asks the guest to confirm, then releases the assigned room. Its progress indicator shows the three checkout steps; check-in shows six steps. Inactivity resets the guest's session at 60 seconds; maintenance pauses that timer. Successful check-in and check-out return to Welcome after a short confirmation.
+
+The demo bookings are persistent database records, not reusable examples: `DEMO2026` and `DEMO2027` start confirmed for check-in, while `DEMO2028` starts checked in for checkout. Each can complete its matching transaction only once. The local development database is in-memory and is reseeded when the backend restarts; hosted demo state persists and must be deliberately restored before reusing a completed booking.
 
 ## Resilience and maintenance mode
 
@@ -111,7 +113,7 @@ Send the same request with `"enabled":false` to recover. Set `MAINTENANCE_MODE=t
 
 ![Maintenance component preview](docs/screenshots/maintenance.png)
 
-Run `npm run dev` in `frontend`, then open `/dev/components` to preview reusable controls and maintenance. The local API seeds `DEMO2026` and `DEMO2027` for check-in and `DEMO2028` as an active checked-in stay for checkout.
+Run `npm run dev` in `frontend`, then open `/dev/components` to preview reusable controls and maintenance. The local API seeds `DEMO2026` and `DEMO2027` for check-in and `DEMO2028` as an active checked-in stay for checkout. Restarting the local backend recreates this in-memory demo state; restarting the hosted API does not reset its PostgreSQL database.
 
 ## Local setup
 
