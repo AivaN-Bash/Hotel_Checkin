@@ -21,6 +21,17 @@ class KioskIntegrationTest {
   @Autowired private MockMvc mockMvc;
 
   @Test
+  void seedsAnActiveDemoStayForCheckout() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/v1/bookings/checkout-lookup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"bookingCode\":\"DEMO2028\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.guestName").value("Taylor Chen"));
+  }
+
+  @Test
   void assignsOnlyOneRoomAcrossIdempotentRetries() throws Exception {
     MvcResult first =
         mockMvc

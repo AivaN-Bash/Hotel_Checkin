@@ -76,7 +76,7 @@ Keep changes in the layer that owns the behavior: screens present state, service
 
 Choose **Begin check-in** for a confirmed booking or **Begin check-out** for a guest who is already checked in. Check-out skips the identity and deposit demo steps, asks the guest to confirm, then releases the assigned room. Its progress indicator shows the three checkout steps; check-in shows six steps. Inactivity resets the guest's session at 60 seconds; maintenance pauses that timer. Successful check-in and check-out return to Welcome after a short confirmation.
 
-The demo bookings are persistent database records, not reusable examples: `DEMO2026` and `DEMO2027` start confirmed for check-in, while `DEMO2028` starts checked in for checkout. Each can complete its matching transaction only once. The local development database is in-memory and is reseeded when the backend restarts; hosted demo state persists and must be deliberately restored before reusing a completed booking.
+The demo bookings are persistent database records, not reusable examples: `DEMO2026` and `DEMO2027` start confirmed for check-in, while `DEMO2028` starts checked in for checkout. Each can complete its matching transaction only once. Migration V4 restores only these demo records once; it preserves other bookings and active room assignments. The local development database is in-memory and is reseeded when the backend restarts; after V4 runs, hosted demo state persists and must be deliberately restored before reusing a completed booking.
 
 ## Resilience and maintenance mode
 
