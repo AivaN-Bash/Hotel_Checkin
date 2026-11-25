@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/AivaN-Bash/Hotel_Checkin/actions/workflows/ci.yml/badge.svg)](https://github.com/AivaN-Bash/Hotel_Checkin/actions/workflows/ci.yml)
 
-A portfolio demo for a bilingual, touch-friendly hotel self check-in kiosk. Guests can find a seeded reservation, review their stay, step through simulated identity and deposit checks, and receive an assigned room with a demo QR key. React/Vite serves the kiosk, Spring Boot validates and coordinates check-ins, and PostgreSQL stores bookings, rooms, and check-in records. **Live demo:** [Open the kiosk](https://frontend-nine-kohl-nzqk24mi4s.vercel.app).
+A portfolio demo for a bilingual, touch-friendly hotel self-service kiosk. Guests can check in, receive an assigned room and demo QR key, or check out an active stay. React/Vite serves the kiosk, Spring Boot coordinates booking and room state, and Supabase PostgreSQL stores bookings, room assignments, and check-in/check-out timestamps. **Live demo:** [Open the kiosk](https://frontend-nine-kohl-nzqk24mi4s.vercel.app).
 
 > This is a demonstration, not hotel operating software. Identity verification, payment, and the QR key are simulations. Use only the included fake records.
 
@@ -11,11 +11,11 @@ A portfolio demo for a bilingual, touch-friendly hotel self check-in kiosk. Gues
 ```mermaid
 flowchart LR
   Guest[Guest] --> Web[React + Vite kiosk on Vercel]
-  Web -->|HTTPS, JSON /api/* rewrite| API[Spring Boot 3 API on Koyeb]
+  Web -->|HTTPS, JSON /api/* rewrite| API[Spring Boot 3 API on Render]
   API -->|JDBC, Flyway| DB[(Supabase PostgreSQL)]
 ```
 
-The browser keeps the active journey in a reducer, not persistent storage. The backend exposes DTOs, validates input, and owns booking and room state. A check-in transaction locks its booking and selects an available matching room with `FOR UPDATE SKIP LOCKED`; the idempotency key makes retries safe. See the [architecture and data model](docs/architecture.md) and [API reference](docs/api.md).
+The browser keeps the active journey in a reducer, not persistent storage. The backend exposes DTOs, validates input, and owns booking and room state. Check-in assigns an available matching room in a transaction. Check-out records its timestamp, changes the booking to `CHECKED_OUT`, and releases its room in a transaction. See the [architecture and data model](docs/architecture.md) and [API reference](docs/api.md).
 
 ## Stack
 
@@ -26,7 +26,7 @@ The browser keeps the active journey in a reducer, not persistent storage. The b
 | API | Java 17, Spring Boot 3, Spring Web, Validation, Data JPA, Actuator | Familiar layered REST service, validation, and health support |
 | Database | H2 `dev`; PostgreSQL in `prod` | Easy local startup and a production SQL database |
 | Schema | Flyway | Versioned schema and fake seed data; Hibernate validates rather than changes schema |
-| Hosting | Vercel Hobby + Koyeb Free + Supabase Free | Static frontend, one small API container, hosted Postgres for a personal demo |
+| Hosting | Vercel + Render + Supabase | Static frontend, one small API container, hosted Postgres for a personal demo |
 | Quality | Vitest, Testing Library, MockMvc/JUnit, ESLint, Prettier, Spotless, GitHub Actions | Repeatable behavior, formatting, and build checks |
 
 The UI follows the current [HeroUI v3 quick start](https://heroui.com/en/docs/react/getting-started/quick-start): React 19, Tailwind CSS 4, and the `@heroui/styles` CSS import. Styling and variants use v3 APIs; no HeroUI v2 provider or component APIs are used.
@@ -48,7 +48,7 @@ The UI follows the current [HeroUI v3 quick start](https://heroui.com/en/docs/re
 
 | Screen | Primary action | Secondary action | Tertiary action |
 | --- | --- | --- | --- |
-| Welcome | Begin check-in | Change language / theme | — |
+| Welcome | Begin check-in / Begin check-out | Change language / theme | — |
 | Find booking | Find booking | Change lookup method / Back | Start over |
 | Review stay | Details look right | Back | Start over |
 | Identity demo | Confirm identity | Back | Start over |
@@ -57,7 +57,7 @@ The UI follows the current [HeroUI v3 quick start](https://heroui.com/en/docs/re
 | Success | Finish | — | — |
 | Maintenance | Try again | Change language | — |
 
-The six-step indicator, inactivity countdown, English/Thai copy, and light/dark theme support the flow. Inactivity resets the guest's session at 60 seconds; maintenance pauses that timer. Successful check-in returns to Welcome after a short confirmation.
+Choose **Begin check-in** for a confirmed booking or **Begin check-out** for a guest who is already checked in. Check-out skips the identity and deposit demo steps, asks the guest to confirm, then releases the assigned room. The six-step indicator, inactivity countdown, English/Thai copy, and light/dark theme support the flow. Inactivity resets the guest's session at 60 seconds; maintenance pauses that timer. Successful check-in and check-out return to Welcome after a short confirmation.
 
 ## Resilience and maintenance mode
 
@@ -94,7 +94,7 @@ Send the same request with `"enabled":false` to recover. Set `MAINTENANCE_MODE=t
 
 ![Maintenance component preview](docs/screenshots/maintenance.png)
 
-Run `npm run dev` in `frontend`, then open `/dev/components` to preview reusable controls and maintenance. The local API starts from demo seed data; use booking code `DEMO2026` or `DEMO2027`.
+Run `npm run dev` in `frontend`, then open `/dev/components` to preview reusable controls and maintenance. The local API seeds `DEMO2026` and `DEMO2027` for check-in and `DEMO2028` as an active checked-in stay for checkout.
 
 ## Local setup
 
@@ -112,7 +112,7 @@ npm ci
 npm run dev
 ```
 
-Open the Vite URL (normally `http://localhost:5173`). The backend defaults to the H2 `dev` profile and seeds fake bookings and rooms. `DEMO2026` is a valid check-in; `DEMO2028` is already checked in for the error case. Frontend `VITE_API_URL` defaults to `/api`; local Vite proxies `/api` to `http://localhost:8080`.
+Open the Vite URL (normally `http://localhost:5173`). The backend defaults to the H2 `dev` profile and seeds fake bookings and rooms. Use `DEMO2026` or `DEMO2027` for check-in and `DEMO2028` for checkout. Frontend `VITE_API_URL` defaults to `/api`; local Vite proxies `/api` to `http://localhost:8080`.
 
 Configuration templates are in [backend/.env.example](backend/.env.example) and [frontend/.env.example](frontend/.env.example). The default local profile does not require Postgres. Never use these fake records as real guest data.
 
@@ -123,7 +123,9 @@ All endpoints are versioned under `/api/v1`. Request and response examples are i
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
 | POST | `/bookings/lookup` | Find by booking code, or last name and phone |
+| POST | `/bookings/checkout-lookup` | Find an active checked-in stay |
 | POST | `/checkins` | Transactional room assignment; requires `Idempotency-Key` |
+| POST | `/checkouts` | Record checkout and make the room available |
 | GET | `/checkins/{id}` | Read a completed check-in |
 | GET | `/rooms` | Admin room status; requires `X-Admin-Key` |
 | GET | `/status` | Public API/database/maintenance status |
@@ -132,31 +134,13 @@ All endpoints are versioned under `/api/v1`. Request and response examples are i
 
 Errors use `{ "timestamp", "status", "code", "message" }`. Entities are not serialized directly.
 
-## Free deployment guide
+## Current deployment
 
-This is a personal portfolio deployment recipe, not a production guarantee. Plan names, limits, and availability can change; verify them before deploying. Vercel Hobby is limited to personal, non-commercial use ([current plan terms and limits](https://vercel.com/docs/plans/hobby)). The Koyeb free service is a single 512 MB RAM, 0.1 vCPU, 2 GB disk instance in Frankfurt or Washington and scales to zero after one hour without traffic ([Koyeb instance limits](https://www.koyeb.com/docs/reference/instances)). Koyeb may request payment details during signup; check the account flow and its [free-tier billing FAQ](https://www.koyeb.com/docs/faqs/pricing). Cold starts are expected, and an open kiosk polls every 15 seconds, so it keeps the API receiving traffic while that page is in use. Supabase Free currently includes PostgreSQL, 500 MB database size, 5 GB uncached and 5 GB cached egress, and no automatic backups; projects with too little activity for a week may pause ([Supabase plans](https://supabase.com/pricing), [pause behavior](https://supabase.com/docs/guides/platform/free-project-pausing)).
+The live demo uses Vercel for the frontend, Render for the Spring Boot API, and Supabase PostgreSQL for persistence. Render deploys the `backend/` Docker service from `main`; Vercel builds the `frontend/` Vite app from `main`. The rewrite in `frontend/vercel.json` sends `/api/*` requests to Render. Flyway applies schema and demo-data migrations when the API starts.
 
-Use Supabase's **shared pooler, session mode** (`:5432`) for the Koyeb connection. Supabase's direct database endpoint is IPv6-only on Free, while the shared session pooler is IPv4 reachable; copy the exact host and user name from the Supabase Connect dialog ([connection modes](https://supabase.com/docs/guides/database/connecting-to-postgres)). Do not select transaction mode for this persistent Spring/Hikari backend.
+Render requires `SPRING_PROFILES_ACTIVE=prod`, `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `ADMIN_API_KEY`, `MAINTENANCE_MODE`, and `CORS_ALLOWED_ORIGINS`. Keep credentials in Render environment settings, never in Git. Set the CORS value to the Vercel site origin only, without `/api` or a trailing slash. Check `https://hotel-checkin-1iql.onrender.com/api/v1/status` and the Vercel `/api/v1/status` route; both should report API and database `UP`.
 
-1. **Create Supabase database.** Create a Free project, choose a region close to Koyeb, set a strong database password, and copy the shared **Session pooler** connection host from Connect. The database migrations and fake seed run automatically at API startup.
-2. **Create the Koyeb API.** Import this GitHub repository as a Docker web service, set the service work directory/build context to `backend`, and use its Dockerfile. Select the Free instance in Frankfurt or Washington. Set these environment variables:
-
-   | Variable | Value |
-   | --- | --- |
-   | `SPRING_PROFILES_ACTIVE` | `prod` |
-   | `DATABASE_URL` | `jdbc:postgresql://<copied-pooler-host>:5432/postgres?sslmode=require` |
-   | `DATABASE_USERNAME` | `postgres.<project-ref>` (copy exact shared-pooler username) |
-   | `DATABASE_PASSWORD` | Supabase database password (percent-encode reserved URL chars only if embedded in URL; here it is a separate variable) |
-   | `ADMIN_API_KEY` | Generate with `openssl rand -hex 32`; keep only in Koyeb secrets/env |
-   | `MAINTENANCE_MODE` | `false` |
-   | `CORS_ALLOWED_ORIGINS` | Your eventual Vercel site URL, e.g. `https://your-project.vercel.app` |
-
-   Wait until Koyeb marks the API healthy. Use `https://<your-koyeb-service-domain>/api/v1/status` to check the API and database. Copy the service domain; do not assume the generated hostname.
-3. **Point the Vercel rewrite at the API.** In `frontend/vercel.json`, replace `replace-with-your-koyeb-service.koyeb.app` with the exact Koyeb service host, leaving `/api/:path*` intact. Vercel external rewrites proxy requests without changing the browser URL ([rewrite docs](https://vercel.com/docs/routing/rewrites)). Commit that URL-only change.
-4. **Deploy the frontend.** Import the repository into Vercel, set Root Directory to `frontend`, framework preset to Vite, and deploy from `main`. `VITE_API_URL=/api` is the default; no secret belongs in Vercel. Redeploy after changing rewrite configuration. Confirm the kiosk loads and `/api/v1/status` is operational through the Vercel origin.
-5. **Exercise recovery.** Use the maintenance curl above, verify the kiosk displays maintenance, send `enabled:false`, and confirm it recovers without refresh. Stop and restart the API once to observe the cold-start screen.
-
-This repository cannot create provider accounts, database passwords, or a public deployment on your behalf. The deployment guide and configuration are prepared; the live demo link remains a placeholder until those account-specific steps are completed.
+For a demo, use `DEMO2026` or `DEMO2027` to check in and `DEMO2028` to check out. After checkout, the booking is `CHECKED_OUT`, `checkins.checked_out_at` is populated, and its room is `AVAILABLE` in Supabase.
 
 ## Security and known limits
 
