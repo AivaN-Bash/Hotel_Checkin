@@ -44,6 +44,7 @@ function KioskApp() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = `hotel-${flow.theme}`;
+    document.documentElement.classList.toggle("dark", flow.theme === "dark");
     document.documentElement.lang = flow.language;
   }, [flow.theme, flow.language]);
 

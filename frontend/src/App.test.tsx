@@ -1,11 +1,45 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+  document.documentElement.classList.remove("dark");
+  delete document.documentElement.dataset.theme;
+});
 
 describe("kiosk availability screens", () => {
+  it("applies the selected theme to HeroUI controls", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            status: "OPERATIONAL",
+            components: { api: "UP", database: "UP" },
+            message: "Ready",
+            estimatedBackAt: null,
+            checkedAt: "2026-11-25T00:00:00Z",
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      ),
+    );
+    const user = userEvent.setup();
+    render(<App />);
+
+    const themeButton = await screen.findByRole("button", {
+      name: "Switch color theme",
+    });
+    expect(document.documentElement).not.toHaveClass("dark");
+
+    await user.click(themeButton);
+    await waitFor(() => expect(document.documentElement).toHaveClass("dark"));
+    expect(document.documentElement.dataset.theme).toBe("hotel-dark");
+  });
+
   it("shows backend maintenance details and returns to welcome after recovery", async () => {
     const response = (status: string, message: string) =>
       new Response(
