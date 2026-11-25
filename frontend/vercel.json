@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://replace-with-your-koyeb-service.koyeb.app/api/:path*"
+      "destination": "https://hotel-checkin-1iql.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",
