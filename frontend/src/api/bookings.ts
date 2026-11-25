@@ -5,6 +5,9 @@ import type {
   KioskState,
 } from "../types/kiosk";
 
+// Render's free instance can need close to a minute to wake after inactivity.
+const BOOKING_LOOKUP_TIMEOUT_MS = 75_000;
+
 export async function lookupBooking(
   state: KioskState,
 ): Promise<BookingDetails> {
@@ -15,11 +18,15 @@ export async function lookupBooking(
           lastName: state.lastName.trim(),
           phoneNumber: state.phoneNumber.trim(),
         };
-  return requestJson<BookingDetails>("/v1/bookings/lookup", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  return requestJson<BookingDetails>(
+    "/v1/bookings/lookup",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    },
+    BOOKING_LOOKUP_TIMEOUT_MS,
+  );
 }
 
 export async function completeCheckin(

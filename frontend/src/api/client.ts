@@ -55,6 +55,15 @@ export async function requestJson<T>(
 
 function normalizeError(payload: unknown, status: number): ApiErrorBody {
   if (isApiErrorBody(payload)) return payload;
+  if (status >= 500) {
+    return {
+      timestamp: new Date().toISOString(),
+      status,
+      code: "SERVICE_UNAVAILABLE",
+      message:
+        "The booking service is temporarily unavailable. Please try again shortly.",
+    };
+  }
   return {
     timestamp: new Date().toISOString(),
     status,
