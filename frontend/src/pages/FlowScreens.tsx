@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Button, Input, Label, TextField } from "@heroui/react";
 import {
   Check,
@@ -368,6 +369,47 @@ export function WelcomeScreen({
   onStartCheckout,
 }: WelcomeProps) {
   const t = copy[language];
+  const mediaTrackRef = useRef<HTMLDivElement>(null);
+  const [mediaExpansion, setMediaExpansion] = useState(0);
+
+  useEffect(() => {
+    const track = mediaTrackRef.current;
+    if (!track) return;
+
+    const updateExpansion = () => {
+      const scrollRange = track.offsetHeight - window.innerHeight;
+      const nextExpansion =
+        scrollRange > 0
+          ? Math.min(
+              1,
+              Math.max(0, -track.getBoundingClientRect().top / scrollRange),
+            )
+          : 0;
+
+      setMediaExpansion((current) =>
+        Math.abs(current - nextExpansion) < 0.005 ? current : nextExpansion,
+      );
+    };
+
+    updateExpansion();
+    window.addEventListener("scroll", updateExpansion, { passive: true });
+    window.addEventListener("resize", updateExpansion);
+    return () => {
+      window.removeEventListener("scroll", updateExpansion);
+      window.removeEventListener("resize", updateExpansion);
+    };
+  }, []);
+
+  const mediaInset = `${Math.min(window.innerWidth * 0.04, 48) * (1 - mediaExpansion)}px`;
+  const mediaStyle: CSSProperties = {
+    inset: mediaInset,
+    borderRadius: `${28 * (1 - mediaExpansion)}px`,
+  };
+  const startFlow = (action: () => void) => {
+    if (window.scrollY > 0) window.scrollTo(0, 0);
+    action();
+  };
+
   return (
     <main className="welcome-page">
       <header className="welcome-header">
@@ -407,48 +449,44 @@ export function WelcomeScreen({
       <div className="welcome-progress">
         <StepProgress step="welcome" labels={t.steps as string[]} />
       </div>
-      <section className="welcome-hero">
-        <div className="welcome-art" aria-hidden="true">
-          <div className="art-sun" />
-          <div className="art-horizon" />
-          <div className="art-arch">
-            <div className="art-arch-inner" />
-            <span className="art-window art-window-one" />
-            <span className="art-window art-window-two" />
-            <span className="art-window art-window-three" />
-            <span className="art-door" />
+      <div className="welcome-expansion-track" ref={mediaTrackRef}>
+        <section className="welcome-hero" aria-label={t.hotel}>
+          <div className="welcome-art" style={mediaStyle} aria-hidden="true">
+            <img src="/images/welcome-resort.jpg" alt="" fetchPriority="high" />
           </div>
-          <div className="art-caption">
-            A PLACE TO PAUSE <span>·</span> 13°45′ N
+          <div className="welcome-copy">
+            <p className="welcome-eyebrow">{t.welcomeEyebrow}</p>
+            <h1>
+              {t.welcomeTitle.split("\n").map((line) => (
+                <span key={line}>{line}</span>
+              ))}
+            </h1>
+            <p className="welcome-body">{t.welcomeBody}</p>
+            <KioskButton
+              variant="primary"
+              size="lg"
+              fullWidth
+              onPress={() => startFlow(onStart)}
+            >
+              {t.start}
+              <span aria-hidden="true">→</span>
+            </KioskButton>
+            <KioskButton
+              variant="secondary"
+              size="lg"
+              fullWidth
+              className="welcome-checkout"
+              onPress={() => startFlow(onStartCheckout)}
+            >
+              {t.startCheckout}
+            </KioskButton>
+            <div className="welcome-assurance">
+              <ShieldCheck size={17} aria-hidden="true" />
+              {t.secure}
+            </div>
           </div>
-        </div>
-        <div className="welcome-copy">
-          <p className="welcome-eyebrow">{t.welcomeEyebrow}</p>
-          <h1>
-            {t.welcomeTitle.split("\n").map((line) => (
-              <span key={line}>{line}</span>
-            ))}
-          </h1>
-          <p className="welcome-body">{t.welcomeBody}</p>
-          <KioskButton variant="primary" size="lg" fullWidth onPress={onStart}>
-            {t.start}
-            <span aria-hidden="true">→</span>
-          </KioskButton>
-          <KioskButton
-            variant="secondary"
-            size="lg"
-            fullWidth
-            className="welcome-checkout"
-            onPress={onStartCheckout}
-          >
-            {t.startCheckout}
-          </KioskButton>
-          <div className="welcome-assurance">
-            <ShieldCheck size={17} aria-hidden="true" />
-            {t.secure}
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
       <footer className="welcome-footer">
         <span>{t.hotel}</span>
         <span>·</span>
