@@ -26,6 +26,7 @@ The browser keeps the active journey in a reducer, not persistent storage. The b
 | API | Java 17, Spring Boot 3, Spring Web, Validation, Data JPA, Actuator | Familiar layered REST service, validation, and health support |
 | Database | H2 `dev`; PostgreSQL in `prod` | Easy local startup and a production SQL database |
 | Schema | Flyway | Versioned schema and fake seed data; Hibernate validates rather than changes schema |
+| Typography | Locally bundled Outfit Variable and Space Mono | Clear headings and body copy, with monospace reserved for short metadata |
 | Hosting | Vercel + Render + Supabase | Static frontend, one small API container, hosted Postgres for a personal demo |
 | Quality | Vitest, Testing Library, MockMvc/JUnit, ESLint, Prettier, Spotless, GitHub Actions | Repeatable behavior, formatting, and build checks |
 
@@ -41,7 +42,7 @@ The UI follows the current [HeroUI v3 quick start](https://heroui.com/en/docs/re
 6. **Type safety:** strict TypeScript types cover flow state, API responses, and component callbacks.
 7. **Separation:** reducer and hooks own flow, idle timing, and service polling; components present that state.
 8. **Developer experience:** `/dev/components` previews shared controls and the maintenance screen.
-9. **Customization:** hotel colors, spacing, radius, light/dark mode, and reduced-motion rules live in `frontend/src/theme/hotel.css`.
+9. **Typography and theming:** Outfit is used consistently for headings and body copy; Space Mono is limited to short labels and metadata. Hotel colors, spacing, radius, light/dark mode, and reduced-motion rules live in `frontend/src/theme/hotel.css`.
 10. **Extensibility:** `KioskButton` and `StepCard` extend HeroUI v3 variants with `tailwind-variants`.
 
 ## Project structure
@@ -71,12 +72,12 @@ Keep changes in the layer that owns the behavior: screens present state, service
 | Identity demo | Confirm identity | Back | Start over |
 | Deposit demo | Confirm demo deposit | Back | Start over |
 | Room assigned | Continue | — | Start over |
-| Success | Finish | — | — |
+| Success | Return to welcome | — | — |
 | Maintenance | Try again | Change language | — |
 
-Choose **Begin check-in** for a confirmed booking or **Begin check-out** for a guest who is already checked in. Check-out skips the identity and deposit demo steps, asks the guest to confirm, then releases the assigned room. Its progress indicator shows the three checkout steps; check-in shows six steps. Inactivity resets the guest's session at 60 seconds; maintenance pauses that timer. Successful check-in and check-out return to Welcome after a short confirmation.
+Choose **Begin check-in** for a confirmed booking or **Begin check-out** for a guest who is already checked in. Check-out skips the identity and deposit demo steps, asks the guest to confirm, then releases the assigned room. Its progress indicator shows the three checkout steps; check-in shows six steps. The completion screen is a separate, centered confirmation card without the journey progress bar, and offers a clear return-to-welcome action. It resets after 12 seconds; inactivity resets other guest sessions at 60 seconds, while maintenance pauses that timer.
 
-The demo bookings are persistent database records: `DEMO2026` and `DEMO2027` start confirmed for check-in, while `DEMO2028` starts checked in for checkout. To make hosted demos repeatable, the next matching lookup restores a completed demo stay: check-in lookup resets `DEMO2026`/`DEMO2027`, and checkout lookup re-arms `DEMO2028` in an available room. This behavior applies only to these exact seeded demo codes; real guest bookings and completed stay records remain unchanged. The local development database is also reseeded when the backend restarts.
+The demo bookings are persistent database records: `DEMO2026` and `DEMO2027` start confirmed for check-in, while `DEMO2028` starts checked in for checkout. The backend recycles completed demo stays on the next matching lookup: check-in lookup restores `DEMO2026`/`DEMO2027`, and checkout lookup re-arms `DEMO2028` in an available room. This behavior applies only to these exact seeded demo codes; real guest bookings and completed stay records remain unchanged. The local development database is also reseeded when the backend restarts.
 
 ## Resilience and maintenance mode
 
@@ -155,11 +156,11 @@ Errors use `{ "timestamp", "status", "code", "message" }`. Entities are not seri
 
 ## Current deployment
 
-The live demo uses Vercel for the frontend, Render for the Spring Boot API, and Supabase PostgreSQL for persistence. Render deploys the `backend/` Docker service from `main`; Vercel builds the `frontend/` Vite app from `main`. The rewrite in `frontend/vercel.json` sends `/api/*` requests to Render. Flyway applies schema and demo-data migrations when the API starts.
+The live demo uses Vercel for the frontend, Render for the Spring Boot API, and Supabase PostgreSQL for persistence. Render runs the `backend/` Docker service from `main`; Vercel builds the `frontend/` Vite app from `main`. The rewrite in `frontend/vercel.json` sends `/api/*` requests to Render. Flyway applies schema and demo-data migrations when the API starts. After pushing changes, verify that Render has deployed the same commit; if it has not, use **Manual Deploy → Deploy latest commit**. A healthy `/status` response confirms connectivity but does not confirm which application commit is running.
 
 Render requires `SPRING_PROFILES_ACTIVE=prod`, `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `ADMIN_API_KEY`, and `MAINTENANCE_MODE`. `CORS_ALLOWED_ORIGINS` defaults to the live Vercel origin plus local Vite; set it to a comma-separated exact-origin allowlist when using another domain. Never commit credentials. Check `https://hotel-checkin-1iql.onrender.com/api/v1/status` and the Vercel `/api/v1/status` route; both should report API and database `UP`.
 
-For a demo, use `DEMO2026` or `DEMO2027` to check in and `DEMO2028` to check out. After checkout, the booking is `CHECKED_OUT`, `checkins.checked_out_at` is populated, and its room is `AVAILABLE` until the next matching demo lookup re-arms it.
+For a demo, use `DEMO2026` or `DEMO2027` to check in and `DEMO2028` to check out. Reusable demo behavior requires the current backend code (commit `2145d29` or later). After checkout, the booking is `CHECKED_OUT`, `checkins.checked_out_at` is populated, and its room is `AVAILABLE` until the next matching demo lookup re-arms it.
 
 ## Security and known limits
 

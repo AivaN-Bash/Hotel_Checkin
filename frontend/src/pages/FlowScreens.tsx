@@ -327,18 +327,13 @@ export function SuccessScreen({
         <span className="wordmark-icon">A</span>
         <span>{t.hotel}</span>
       </header>
-      <div className="success-progress">
-        <StepProgress
-          step="success"
-          labels={(checkedOut ? t.checkoutSteps : t.steps) as string[]}
-          mode={checkedOut ? "checkout" : "checkin"}
-        />
-      </div>
       <StepCard className="success-card">
-        <div className="success-check">
+        <div className="success-check" aria-hidden="true">
           <Check size={34} aria-hidden="true" />
         </div>
-        <p className="success-eyebrow">{t.complimentary}</p>
+        <p className="success-eyebrow">
+          {checkedOut ? t.checkoutSuccessEyebrow : t.successEyebrow}
+        </p>
         <h1>{checkedOut ? t.checkoutSuccessTitle : t.successTitle}</h1>
         <p>{checkedOut ? t.checkoutSuccessBody : t.successBody}</p>
         <p className="success-reset-note">{t.autoReset}</p>

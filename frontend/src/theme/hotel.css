@@ -19,8 +19,6 @@
     --hotel-danger: oklch(0.47 0.16 27);
     --font-sans:
       "Outfit Variable", "Segoe UI", Inter, ui-sans-serif, system-ui, sans-serif;
-    --font-serif:
-      "Instrument Serif", "Palatino Linotype", "Book Antiqua", Georgia, serif;
     --font-mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     --hotel-spacing-unit: 4px;
     --hotel-space-sm: 12px;
@@ -135,10 +133,10 @@ input {
 }
 .maintenance-card h1 {
   margin: 14px 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: clamp(34px, 5vw, 46px);
-  font-weight: 400;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: -0.025em;
   line-height: 1.08;
   text-wrap: balance;
 }
@@ -193,8 +191,9 @@ input {
   border: 1px solid var(--hotel-brass);
   border-radius: 50%;
   color: var(--hotel-brass);
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 30px;
+  font-weight: 600;
 }
 .waking-card [role="progressbar"] {
   width: 100%;
@@ -238,18 +237,19 @@ input {
   border: 1px solid var(--hotel-brass);
   border-radius: 50%;
   color: var(--hotel-brass);
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 23px;
+  font-weight: 500;
 }
 .wordmark strong,
 .wordmark small {
   display: block;
 }
 .wordmark strong {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 14px;
-  font-weight: 400;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
 }
 .wordmark small {
   margin-top: 3px;
@@ -356,10 +356,10 @@ input {
 }
 .flow-card-heading h1 {
   margin: 13px 0 8px;
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: clamp(30px, 4.5vw, 42px);
-  font-weight: 400;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: -0.025em;
   line-height: 1.12;
   text-wrap: balance;
 }
@@ -557,10 +557,10 @@ input {
   font-size: 12px;
 }
 .room-number-panel strong {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: clamp(52px, 8vw, 76px);
-  font-weight: 400;
-  letter-spacing: -0.04em;
+  font-weight: 600;
+  letter-spacing: -0.035em;
   line-height: 1;
 }
 .qr-panel {
@@ -580,19 +580,14 @@ input {
 }
 .success-page {
   display: grid;
-  grid-template-rows: auto auto 1fr;
-  padding: 22px clamp(18px, 5vw, 72px);
+  grid-template-rows: auto 1fr;
+  gap: clamp(24px, 5vh, 48px);
+  padding: clamp(18px, 3vw, 32px) clamp(18px, 5vw, 72px);
   background: radial-gradient(
     ellipse at 50% 45%,
     color-mix(in oklab, var(--hotel-brass), var(--hotel-canvas) 94%),
     var(--hotel-canvas) 68%
   );
-}
-.success-progress {
-  width: min(100%, 860px);
-  justify-self: center;
-  align-self: end;
-  margin: 8px auto 0;
 }
 .success-topline {
   justify-content: flex-start;
@@ -606,43 +601,46 @@ input {
   justify-self: center;
   display: grid;
   justify-items: center;
-  width: min(100%, 560px);
-  padding: clamp(30px, 7vw, 64px);
+  gap: 12px;
+  width: min(100%, 520px);
+  padding: clamp(28px, 6vw, 52px);
   text-align: center;
 }
 .success-check {
   display: grid;
   place-items: center;
-  width: 74px;
-  height: 74px;
-  margin-bottom: 15px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background: color-mix(in oklab, var(--hotel-brass), transparent 84%);
   color: var(--hotel-brass);
 }
 .success-eyebrow {
+  margin: 0;
   color: var(--hotel-muted);
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.19em;
+  letter-spacing: 0.12em;
 }
 .success-card h1 {
-  margin: 8px 0;
-  font-family: var(--font-serif);
-  font-size: clamp(36px, 5vw, 48px);
-  font-weight: 400;
-  letter-spacing: -0.035em;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
   text-wrap: balance;
 }
 .success-card > p:not(.success-eyebrow) {
+  margin: 0;
   max-width: 390px;
   color: var(--hotel-muted);
   line-height: 1.65;
 }
 .success-card .kiosk-button--touch {
   width: min(100%, 320px);
-  margin-top: 10px;
+  margin-top: 4px;
 }
 .success-reset-note {
   font-size: 12px;
@@ -772,10 +770,10 @@ input {
 .welcome-copy h1 {
   display: grid;
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: clamp(42px, 5vw, 64px);
-  font-weight: 400;
-  letter-spacing: -0.035em;
+  font-weight: 500;
+  letter-spacing: -0.03em;
   line-height: 1.04;
   text-wrap: balance;
 }
@@ -860,9 +858,9 @@ input {
 }
 .idle-dialog h2 {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 27px;
-  font-weight: 400;
+  font-weight: 600;
 }
 .idle-dialog p {
   color: var(--hotel-muted);
@@ -880,9 +878,9 @@ input {
 }
 .preview-header h1 {
   margin: 8px 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 42px;
-  font-weight: 400;
+  font-weight: 600;
 }
 .preview-grid {
   display: grid;
@@ -899,9 +897,9 @@ input {
 }
 .preview-card h2 {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-size: 24px;
-  font-weight: 400;
+  font-weight: 600;
 }
 .preview-card p {
   color: var(--hotel-muted);
@@ -1010,6 +1008,25 @@ input {
     width: 100%;
     margin: 4px 0 0;
     text-align: left;
+  }
+  .success-page {
+    gap: 20px;
+    padding: 16px;
+  }
+  .success-topline {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+  .success-card {
+    gap: 10px;
+    padding: 28px 20px;
+  }
+  .success-check {
+    width: 56px;
+    height: 56px;
+  }
+  .success-card h1 {
+    font-size: clamp(28px, 8vw, 36px);
   }
   .kiosk-page {
     padding: 14px 14px 12px;
@@ -1146,6 +1163,21 @@ input {
   }
   .welcome-footer {
     display: none;
+  }
+  .success-page {
+    gap: 12px;
+    padding-block: 10px;
+  }
+  .success-card {
+    gap: 8px;
+    padding: 20px;
+  }
+  .success-check {
+    width: 48px;
+    height: 48px;
+  }
+  .success-card h1 {
+    font-size: 28px;
   }
 }
 @media (hover: hover) and (pointer: fine) {

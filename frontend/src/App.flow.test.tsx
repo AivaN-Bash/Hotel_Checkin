@@ -89,6 +89,10 @@ describe("self check-in journey", () => {
         screen.getByRole("heading", { name: "You’re all checked in" }),
       ).toBeInTheDocument(),
     );
+    expect(screen.getByText("CHECK-IN COMPLETE")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("group", { name: "Step 6 of 6" }),
+    ).not.toBeInTheDocument();
   });
 
   it("checks out an active stay and confirms completion", async () => {
@@ -150,6 +154,10 @@ describe("self check-in journey", () => {
     expect(
       await screen.findByRole("heading", { name: "You’re checked out" }),
     ).toBeInTheDocument();
+    expect(screen.getByText("CHECK-OUT COMPLETE")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("group", { name: "Step 3 of 3" }),
+    ).not.toBeInTheDocument();
     expect(String(fetchMock.mock.calls[1][0])).toContain(
       "/v1/bookings/checkout-lookup",
     );
