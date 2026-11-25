@@ -1,0 +1,16 @@
+node_modules/
+dist/
+target/
+build/
+.env
+.env.*
+!.env.example
+*.log
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+.gradle/
+coverage/
+playwright-report/
+test-results/
